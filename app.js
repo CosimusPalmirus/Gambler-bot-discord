@@ -209,7 +209,7 @@
         stato.inGioco = null; disegnaPip();
         if (r && r.ancora) { if (opz.pratica) apriSala(g, 'bot'); else apri(g.id); }
       }
-    }).catch(function () { stato.inGioco = null; toast('Il gioco non si apre, riprova.'); disegnaPip(); });
+    }).catch(function (e) { stato.inGioco = null; toast('Il gioco non si apre, riprova.'); window.GXD.avvisi.push('apriGioco ' + g.id + ': ' + ((e && e.message) || e)); diagnosi(); disegnaPip(); });
   }
   function salaVera(g, modo) {
     if (modo === 'bot' && window.GXD.praticaLocale(g.id)) { avviaGioco(g, null, {pratica: true}); return; }
@@ -471,5 +471,30 @@
     stato.io = r.io; stato.gente = r.partecipanti; stato.instanceId = r.instanceId;
     $('nome-canale').textContent = r.canale + (r.modo === 'finto' ? ' · dati di prova' : '');
     disegnaCanale();
+    diagnosi();
+  });
+  /* 16/11 (fase di prova): dentro Discord, ogni errore si VEDE in un riquadro in basso (per la foto da mandare) */
+  function diagnosi() {
+    var G = window.GXD; if (!G.dentroDiscord) return;
+    var righe = [].concat(G.erroreAvvio ? ['avvio: ' + G.erroreAvvio] : [], G.avvisi || []);
+    var box = document.getElementById('gx-diag');
+    if (!righe.length) { if (box) box.remove(); return; }
+    if (!box) {
+      box = document.createElement('div'); box.id = 'gx-diag';
+      box.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:rgba(40,0,0,.92);color:#ffb4b4;' +
+        'font:12px/1.35 ui-monospace,Consolas,monospace;padding:8px 10px;border-radius:10px;max-height:34vh;overflow:auto;white-space:pre-wrap';
+      box.title = 'tocca per chiudere'; box.addEventListener('click', function () { box.remove(); });
+      document.body.appendChild(box);
+    }
+    box.textContent = 'DIAGNOSI (manda una foto di questo riquadro)' + String.fromCharCode(10) + righe.slice(-12).join(String.fromCharCode(10));
+  }
+  window.GXDiagnosi = diagnosi;
+  window.addEventListener('error', function (e) {
+    (window.GXD.avvisi = window.GXD.avvisi || []).push('js: ' + (e.message || (e.target && (e.target.src || e.target.href)) || 'errore') +
+      (e.filename ? ' @' + String(e.filename).split('/').pop() + ':' + e.lineno : ''));
+    diagnosi();
+  }, true);
+  window.addEventListener('unhandledrejection', function (e) {
+    window.GXD.avvisi.push('promise: ' + ((e.reason && e.reason.message) || e.reason)); diagnosi();
   });
 })();

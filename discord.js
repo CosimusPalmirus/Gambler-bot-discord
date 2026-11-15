@@ -89,21 +89,28 @@
       });
     }).then(function (t) {
       GXD.sessione = t.sessione || null;
-      return sdk.commands.authenticate({access_token: t.access_token});
-    }).then(function (auth) {
-      if (!auth || !auth.user) throw new Error('authenticate fallito');
-      var io = dalDiscord(auth.user);
-      sdk.subscribe(ev.ACTIVITY_INSTANCE_PARTICIPANTS_UPDATE, function (d) {
-        avvisa(ascoltaPart, (d.participants || []).map(dalDiscord));
-      });
+      // 16/11: dopo il login col NOSTRO server non si torna MAI al finto; ogni passo dopo e' facoltativo
+      var ioSrv = t.io ? dalServer(t.io) : null;
+      return Promise.resolve().then(function () { return sdk.commands.authenticate({access_token: t.access_token}); })
+        .then(function (auth) { return (auth && auth.user) ? dalDiscord(auth.user) : ioSrv; },
+              function (e) { GXD.avvisi.push('authenticate: ' + (e && e.message)); return ioSrv; });
+    }).then(function (io) {
+      if (!io) throw new Error('utente sconosciuto');
+      try {
+        Promise.resolve(sdk.subscribe(ev.ACTIVITY_INSTANCE_PARTICIPANTS_UPDATE, function (d) {
+          avvisa(ascoltaPart, (d.participants || []).map(dalDiscord));
+        })).catch(function (e) { GXD.avvisi.push('partecipanti: ' + (e && e.message)); });
+      } catch (e) { GXD.avvisi.push('partecipanti: ' + (e && e.message)); }
       // 0 = a tutto schermo, 1 = finestrella (PIP), 2 = griglia
       var suLayout = function (d) { avvisa(ascoltaLayout, d.layout_mode === 1 ? 'pip' : (d.layout_mode === 2 ? 'griglia' : 'pieno')); };
       try { if (sdk.subscribeToLayoutModeUpdatesCompat) sdk.subscribeToLayoutModeUpdatesCompat(suLayout); } catch (e) { console.warn(e); }
-      return sdk.commands.getActivityInstanceConnectedParticipants().then(function (r) {
-        var parte = (r.participants || []).map(dalDiscord);
+      var esito = function (parte) {
         if (!parte.some(function (p) { return p.id === io.id; })) parte.unshift(io);
         return {modo: 'vero', io: io, partecipanti: parte, instanceId: sdk.instanceId, canale: 'Canale vocale'};
-      });
+      };
+      return Promise.resolve().then(function () { return sdk.commands.getActivityInstanceConnectedParticipants(); })
+        .then(function (r) { return esito(((r && r.participants) || []).map(dalDiscord)); },
+              function (e) { GXD.avvisi.push('elenco canale: ' + (e && e.message)); return esito([]); });
     });
   }
 
@@ -116,11 +123,13 @@
   }
 
   var GXD = window.GXD = {
-    dentroDiscord: dentroDiscord, vero: false,
+    dentroDiscord: dentroDiscord, vero: false, avvisi: [], erroreAvvio: '',
     sdk: null, sessione: null, io: null,
     avvia: function () {
       var p = (dentroDiscord && CLIENT_ID) ? vero().then(function (r) { GXD.vero = true; return r; }, function (e) {
-        console.warn('[GXD] Discord non pronto, uso i dati finti:', e && e.message);
+        console.warn('[GXD] Discord non pronto:', e && e.message);
+        GXD.erroreAvvio = String((e && e.message) || e || 'errore');
+        if (GXD.sessione) { GXD.vero = true; return {modo: 'vero', io: {id: 'dc:?', nome: 'Tu', foto: '', colore: '#8b83f0'}, partecipanti: [], instanceId: (GXD.sdk && GXD.sdk.instanceId) || '', canale: 'Canale vocale'}; }
         return finto();
       }) : finto();
       return p.then(function (r) { GXD.io = r.io; return r; });
