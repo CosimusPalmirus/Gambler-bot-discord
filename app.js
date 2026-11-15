@@ -144,9 +144,13 @@
     $('f-dur').textContent = g.durata;
     $('f-bot').textContent = g.bot ? 'Sì' : 'No';
     $('f-nota').textContent = notaCanale(g);
-    var tb = $('t-bot');
-    tb.disabled = !g.bot;
-    tb.innerHTML = g.bot ? 'Allenati coi bot' : 'Allenati coi bot <small>· presto</small>';
+    var tb = $('t-bot'), on = window.GXD.attivo(g.id);
+    tb.disabled = !g.bot || !on;
+    tb.innerHTML = (g.bot && on) ? 'Allenati coi bot' : 'Allenati coi bot <small>· presto</small>';
+    // fase 1: dentro Discord si gioca solo ai giochi accesi sul server; gli altri dicono «presto» (mai un tasto muto)
+    $('t-canale').disabled = !on; $('t-coda').disabled = !on;
+    $('t-canale').lastChild.textContent = on ? ' Gioca con il canale' : ' Gioca con il canale · presto';
+    $('t-coda').lastChild.textContent = on ? ' Cerca avversari' : ' Cerca avversari · presto';
     var v = $('velo'); v.classList.add('su'); v.setAttribute('aria-hidden', 'false');
     disegnaPip();
     setTimeout(function () { $('t-canale').focus({preventScroll: true}); }, 60);
@@ -155,10 +159,59 @@
     var v = $('velo'); v.classList.remove('su'); v.setAttribute('aria-hidden', 'true'); stato.aperto = null;
   }
 
+  /* ───────── partita vera (dentro Discord) ───────── */
+  var ERRORI = {pieno: 'Tutti i tavoli gratis sono occupati: riprova tra poco.', limite: 'Tante partite di fila: riprova tra qualche minuto.',
+                gioco_non_attivo: 'Questo gioco arriva presto.', sessione: 'Accesso scaduto: riapri l’attività.', istanza: 'Riapri l’attività dal canale.'};
+  function errore(e) { toast(ERRORI[e] || 'Non riesco a partire, riprova tra poco.'); }
+  function avviaGioco(g, ticket, opz) {
+    opz = opz || {};
+    stato.inGioco = g;
+    disegnaPip();
+    window.GXD.apriGioco(g.id, ticket, {
+      pratica: !!opz.pratica, persone: stato.gente.concat(opz.avversari || []),
+      onFine: function (r) {
+        stato.inGioco = null; disegnaPip();
+        if (r && r.ancora) { if (opz.pratica) apriSala(g, 'bot'); else apri(g.id); }
+      }
+    }).catch(function () { stato.inGioco = null; toast('Il gioco non si apre, riprova.'); disegnaPip(); });
+  }
+  function salaVera(g, modo) {
+    if (modo === 'bot' && window.GXD.praticaLocale(g.id)) { avviaGioco(g, null, {pratica: true}); return; }
+    if (modo === 'bot') {
+      stato.partita = window.GXD.avviaPartita(g.id, 'bot', stato.instanceId, function (m) {
+        stato.partita = null;
+        if (m.stato === 'via') avviaGioco(g, m.ticket, {pratica: true}); else errore(m.errore);
+      });
+      return;
+    }
+    stato.sala = {g: g, modo: modo, posti: [{p: stato.io, st: 'pronto'}], vera: true, attesi: 2, min: 2, bot: false, conBot: true, pieno: false};
+    $('s-ico').innerHTML = icona(g);
+    $('s-nome').textContent = g.nome;
+    $('s-via').style.display = 'none';
+    disegnaSala();
+    var s = $('sala'); s.classList.add('su'); s.setAttribute('aria-hidden', 'false');
+    var S = stato.sala;
+    S.h = window.GXD.avviaPartita(g.id, 'canale', stato.instanceId, function (m) {
+      if (stato.sala !== S) return;
+      if (m.stato === 'attesa') {
+        S.attesi = m.posti || 2; S.min = m.min || S.attesi; S.bot = !!m.bot; S.pieno = !!m.pieno;
+        S.posti = (m.in_sala || []).map(function (p) { return {p: p, st: 'pronto'}; });
+        disegnaSala();
+      } else if (m.stato === 'via') {
+        S.h = null; chiudiSala();
+        avviaGioco(g, m.ticket, {avversari: m.avversari});
+      } else if (m.stato === 'errore') {
+        S.h = null; chiudiSala(); errore(m.errore);
+      }
+    });
+  }
+
   /* ───────── sala d'attesa ───────── */
   var tSala = [];
   function apriSala(g, modo) {
     tSala.forEach(clearTimeout); tSala = [];
+    if (window.GXD.vero) { salaVera(g, modo); return; }
+    $('s-via').style.display = '';
     var posti = [];
     if (modo === 'bot') {
       posti.push({p: stato.io, st: 'pronto'});
@@ -185,6 +238,30 @@
   }
   function disegnaSala() {
     var S = stato.sala; if (!S) return;
+    if (S.vera) {
+      var n = S.posti.length, manca = Math.max(0, S.attesi - n), puo = S.min < S.attesi && n >= S.min;
+      var mancaMin = Math.max(0, S.min - n);
+      $('s-stato').textContent = S.pieno ? 'Tutti i tavoli gratis sono occupati: aspetto un posto libero'
+        : puo ? 'Siete in ' + n + ' (fino a ' + S.attesi + '): si parte quando volete' + (S.conBot && S.bot ? ', i posti vuoti ai bot' : '')
+        : (manca ? 'Aspetto ' + (S.min < S.attesi
+                     ? (mancaMin === 1 ? 'almeno un altro giocatore del canale' : 'almeno ' + mancaMin + ' giocatori del canale')
+                     : (manca === 1 ? 'un altro giocatore del canale' : manca + ' giocatori del canale')) + ' · si parte da soli quando ci siete'
+                 : 'Si parte');
+      // giochi da 2 a 4 (Smash): «Inizia la partita» con chi c'e', e i posti vuoti ai bot se si vuole
+      var via = $('s-via');
+      via.style.display = S.min < S.attesi ? '' : 'none';
+      via.disabled = !puo || S.pieno || !!S.partito; via.style.opacity = via.disabled ? .45 : 1;
+      via.textContent = S.conBot && S.bot && n < S.attesi ? 'Inizia la partita · con i bot' : 'Inizia la partita';
+      var tb = $('s-bot');
+      tb.style.display = (S.min < S.attesi && S.bot) ? '' : 'none';
+      tb.classList.toggle('on', S.conBot); tb.setAttribute('aria-pressed', S.conBot ? 'true' : 'false');
+      $('s-posti').innerHTML = S.posti.map(function (x) {
+        var io = stato.io && x.p.id === stato.io.id;
+        return '<li>' + avatar(x.p) + '<b>' + esc(io ? x.p.nome + ' (tu)' : x.p.nome) + '</b><span class="st ok">pronto</span></li>';
+      }).join('') + (manca ? '<li class="guarda"><span class="av" style="background:#3a3a3c">?</span><b>Posto libero</b><span class="st">chi apre Neon Pong nel canale entra qui</span></li>' : '');
+      disegnaPip();
+      return;
+    }
     var gioca = S.posti.filter(function (x) { return !x.guarda; });
     var pronti = gioca.filter(function (x) { return x.st === 'pronto'; }).length;
     $('s-stato').textContent = S.modo === 'bot' ? 'Allenamento coi bot · non conta per nessuno'
@@ -202,6 +279,7 @@
   }
   function chiudiSala() {
     tSala.forEach(clearTimeout); tSala = [];
+    if (stato.sala && stato.sala.h) stato.sala.h.annulla();
     stato.sala = null;
     var s = $('sala'); s.classList.remove('su'); s.setAttribute('aria-hidden', 'true');
     disegnaPip();
@@ -211,7 +289,7 @@
   function mmss(s) { return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); }
   function apriCoda(g) {
     chiudiCoda();
-    var posti = g.max === 2 ? 2 : Math.min(g.max, Math.max(g.min, 4));
+    var posti = (g.max === 2 || window.GXD.vero) ? 2 : Math.min(g.max, Math.max(g.min, 4));   // fase 1: la coda vera abbina a due
     var C = stato.coda = {g: g, posti: posti, t0: Date.now(), trovato: false, visti: 0, giro: null, via: null};
     var el = $('coda');
     el.classList.remove('trovato'); el.classList.add('in-ricerca', 'su'); el.setAttribute('aria-hidden', 'false');
@@ -230,13 +308,14 @@
     C.h = window.GXD.cercaAvversari(g.id, posti, function (m) {
       if (stato.coda !== C) return;
       if (m.stato === 'in_coda') {
+        if (m.pieno) { $('c-info').textContent = 'Tutti i tavoli gratis sono occupati: resto in coda.'; return; }
         $('c-info').innerHTML = '<b>' + m.in_coda + '</b> in coda per ' + esc(g.nome) +
           (posti > 2 ? ' · trovati <b>' + (m.avversari || []).length + '</b> di ' + (posti - 1) : '');
         disegnaTrovati(C, m.avversari || []);
       } else if (m.stato === 'trovato') {
         trovato(C, m);
       } else if (m.stato === 'errore') {
-        chiudiCoda('Coda non disponibile, riprova tra poco');
+        chiudiCoda(ERRORI[m.errore] || 'Coda non disponibile, riprova tra poco');
       }
     });
     disegnaPip();
@@ -262,6 +341,7 @@
     C.via = setInterval(function () {
       n--;
       if (n > 0) { $('c-tempo').textContent = 'Si parte tra ' + n; disegnaPip(); return; }
+      if (window.GXD.vero && m.ticket) { C.trovataVera = true; chiudiCoda(); avviaGioco(C.g, m.ticket, {avversari: m.avversari}); return; }
       chiudiCoda('Prototipo: qui parte ' + C.g.nome + ' con ' + m.avversari.map(function (p) { return p.nome; }).join(', ') + '.');
     }, 1000);
     disegnaPip();
@@ -269,7 +349,7 @@
   function chiudiCoda(msg) {
     var C = stato.coda; if (!C) return;
     clearInterval(C.giro); clearInterval(C.via);
-    if (C.h) C.h.annulla();
+    if (C.h) C.h.annulla(C.trovataVera);
     stato.coda = null;
     var el = $('coda'); el.classList.remove('su', 'in-ricerca', 'trovato'); el.setAttribute('aria-hidden', 'true');
     if (msg) toast(msg);
@@ -283,12 +363,14 @@
     document.documentElement.classList.toggle('modo-pip', pip);
   }
   function disegnaPip() {
-    var g = (stato.coda && stato.coda.g) || (stato.sala && stato.sala.g) || stato.aperto || stato.ultimo, n = stato.gente.length;
+    var g = stato.inGioco || (stato.coda && stato.coda.g) || (stato.sala && stato.sala.g) || stato.aperto || stato.ultimo, n = stato.gente.length;
     $('p-ico').innerHTML = g ? icona(g) : '<svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>';
     $('p-sopra').textContent = n + ' nel canale';
     $('p-nome').textContent = g ? g.nome : 'Giochi del canale';
     var st;
-    if (stato.coda) {
+    if (stato.inGioco) {
+      g = stato.inGioco; st = 'In partita';
+    } else if (stato.coda) {
       st = stato.coda.trovato ? 'Avversari trovati · si parte'
         : 'In coda pubblica · ' + mmss(Math.floor((Date.now() - stato.coda.t0) / 1000));
     } else if (stato.sala) {
@@ -316,16 +398,23 @@
   $('velo').addEventListener('click', function (e) { if (e.target === this) chiudi(); });
   $('chiudi').addEventListener('click', chiudi);
   $('t-canale').addEventListener('click', function () { var g = stato.aperto; chiudi(); apriSala(g, 'canale'); });
-  $('t-bot').addEventListener('click', function () { var g = stato.aperto; if (!g || !g.bot) return; chiudi(); apriSala(g, 'bot'); });
+  $('t-bot').addEventListener('click', function () {
+    var g = stato.aperto; if (!g || !g.bot) return; chiudi();
+    if (window.GXD.praticaLocale(g.id)) { avviaGioco(g, null, {pratica: true}); return; }   // anche fuori da Discord
+    apriSala(g, 'bot');
+  });
   $('s-esci').addEventListener('click', chiudiSala);
+  $('s-bot').addEventListener('click', function () { var S = stato.sala; if (!S || !S.vera) return; S.conBot = !S.conBot; disegnaSala(); });
   $('t-coda').addEventListener('click', function () { var g = stato.aperto; if (!g) return; chiudi(); apriCoda(g); });
   $('c-annulla').addEventListener('click', function () { chiudiCoda(stato.coda && stato.coda.trovato ? '' : 'Ricerca annullata'); });
   $('s-via').addEventListener('click', function () {
     if (this.disabled) return;
+    if (stato.sala && stato.sala.vera) { if (stato.sala.h) stato.sala.h.avvia(stato.sala.conBot); stato.sala.partito = true; disegnaSala(); return; }
     toast('Prototipo: qui parte ' + stato.sala.g.nome + ' per tutta la sala.');
     chiudiSala();
   });
   document.addEventListener('keydown', function (e) {
+    if (stato.inGioco) return;
     if (e.key === 'Escape') { if (stato.coda) chiudiCoda('Ricerca annullata'); else if (stato.sala) chiudiSala(); else if (stato.aperto) chiudi(); }
   });
   var inp = $('cerca');

@@ -1,0 +1,52 @@
+/* NEON PONG · modo Discord. Stessa linea del catalogo: nero pieno, vetro, un accento viola. */
+html.in-gioco,html.in-gioco body{overflow:hidden}
+.pg-root{position:fixed;inset:0;z-index:60;background:#000;color:var(--x-fg,#f2f2f4);font-family:var(--x-body,system-ui,sans-serif);
+  padding:var(--sa-t,0) var(--sa-r,0) var(--sa-b,0) var(--sa-l,0);touch-action:none;user-select:none;-webkit-user-select:none}
+.pg-cv{position:absolute;left:0;display:block;cursor:crosshair}
+.pg-hud{position:relative;z-index:2;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:10px 72px 8px 14px;min-height:56px}
+.pg-gioc{display:flex;align-items:center;gap:8px;min-width:0}
+.pg-lui{flex-direction:row-reverse;justify-content:flex-start}
+.pg-av{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font:600 13px var(--x-disp,system-ui);color:#000;background:#5ac8fa center/cover no-repeat}
+.pg-io .pg-av{background-color:#8b83f0}
+.pg-nome{font:600 14px var(--x-body,system-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:22vw}
+.pg-mods{display:flex;gap:4px;flex-wrap:wrap}
+.pg-mods em{font:600 10.5px var(--x-body,system-ui);font-style:normal;padding:2px 7px;border-radius:99px;background:rgba(255,214,10,.16);color:#ffd60a;white-space:nowrap}
+.pg-punti{display:flex;align-items:baseline;gap:8px;font:700 30px/1 var(--x-disp,system-ui);font-variant-numeric:tabular-nums}
+.pg-punti i{font-style:normal;color:var(--x-grey,#8e8e93);font-weight:400}
+.pg-sm{color:#8b83f0}.pg-sl{color:#5ac8fa}
+.pg-punti small{font:500 11px var(--x-body,system-ui);color:var(--x-grey,#8e8e93);margin-left:2px}
+.pg-conta{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.8);z-index:3;font:700 96px/1 var(--x-disp,system-ui);
+  color:#fff;opacity:0;pointer-events:none;text-shadow:0 0 30px rgba(139,131,240,.9);transition:opacity .15s,transform .25s var(--x-molla,ease)}
+.pg-conta.su{opacity:.92;transform:translate(-50%,-50%) scale(1)}
+.pg-avviso{position:absolute;left:50%;bottom:calc(18px + var(--sa-b,0px));transform:translate(-50%,8px);z-index:3;padding:8px 14px;border-radius:99px;
+  background:rgba(28,28,30,.86);border:.5px solid rgba(255,255,255,.14);font:600 13px var(--x-body,system-ui);opacity:0;transition:.2s;pointer-events:none;white-space:nowrap}
+.pg-avviso.su{opacity:1;transform:translate(-50%,0)}
+.pg-stato{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;font:500 15px var(--x-body,system-ui);color:var(--x-grey,#8e8e93)}
+.pg-tasti-guida{position:absolute;right:14px;bottom:calc(10px + var(--sa-b,0px));z-index:2;font:500 11.5px var(--x-body,system-ui);color:var(--x-grey2,#636366);display:flex;gap:4px;align-items:center}
+.pg-k{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 4px;border-radius:5px;border:.5px solid rgba(255,255,255,.18);color:var(--x-grey,#8e8e93);font-weight:600}
+.pg-verticale .pg-tasti-guida{display:none}
+.pg-esci{position:absolute;right:max(12px,var(--sa-r,0px));top:calc(12px + var(--sa-t,0px));z-index:4;height:32px;padding:0 14px;border-radius:99px;border:0;
+  background:rgba(255,255,255,.1);color:#f2f2f4;font:600 13px var(--x-body,system-ui)}
+.pg-esci:hover{background:rgba(255,255,255,.16)}
+.pg-fine{position:absolute;inset:0;z-index:5;display:grid;place-items:center;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.pg-fine[hidden]{display:none}
+.pg-fine-box{width:min(360px,calc(100% - 32px));padding:24px 20px 18px;border-radius:24px;text-align:center;
+  background:var(--x-vetro,rgba(255,255,255,.06));border:var(--x-vetro-filo,.5px solid rgba(255,255,255,.13));box-shadow:var(--x-vetro-ombra,none)}
+.pg-fine-box h3{margin:0 0 6px;font:700 26px/1.15 var(--x-disp,system-ui);letter-spacing:-.02em}
+.pg-fine-box p{margin:0 0 18px;color:var(--x-grey,#8e8e93);font:400 15px/1.4 var(--x-body,system-ui)}
+.pg-fine-tasti{display:grid;gap:8px}
+.pg-fine-tasti button{height:46px;border-radius:14px;border:0;font:600 16px var(--x-body,system-ui)}
+.pg-fine-tasti .t1{background:#8b83f0;color:#000}
+.pg-fine-tasti .t2{background:rgba(255,255,255,.1);color:#f2f2f4}
+/* finestrella di Discord (PIP) e schermi bassi: solo campo e punteggio */
+.pg-piccolo .pg-hud{position:absolute;left:0;right:0;top:0;padding:4px 8px;min-height:0;background:linear-gradient(#000c,#0000)}
+.pg-piccolo .pg-gioc,.pg-piccolo .pg-tasti-guida,.pg-piccolo .pg-punti small{display:none}
+.pg-piccolo .pg-hud{grid-template-columns:1fr}
+.pg-piccolo .pg-punti{justify-content:center;font-size:18px}
+.pg-piccolo .pg-esci{height:26px;padding:0 10px;font-size:12px;top:4px;right:6px}
+.pg-piccolo .pg-conta{font-size:56px}
+.pg-piccolo .pg-fine-box{padding:12px;border-radius:16px}
+.pg-piccolo .pg-fine-box h3{font-size:18px}.pg-piccolo .pg-fine-box p{margin-bottom:8px;font-size:13px}
+.pg-piccolo .pg-fine-tasti button{height:34px;font-size:13px}
+@media (max-width:520px){.pg-hud{padding-right:70px}.pg-nome{max-width:24vw;font-size:13px}.pg-mods{display:none}}
+html.in-gioco .pip,html.in-gioco .toast{display:none}

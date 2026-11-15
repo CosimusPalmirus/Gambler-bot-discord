@@ -2,8 +2,9 @@
    Fonte: _levelup/restyle_1311/arena_giochi.json + gbx_arena.js (nomi e categorie dell'Arena),
    bot = tabella _PRACTICE_GAMES di backend.py (copia locale, da riconfermare sul VPS).
    Testi riscritti SENZA soldi: niente piatto, posta, premio, commissione.
-   Esclusi apposta (vedi PIANO.md): giochi contro la casa, Roulette russa, Dadi, Sasso carta forbice,
-   Poker 1v1, Blackjack 1v1, Poker a 5, Sette e mezzo, Bisca.
+   Esclusi apposta (vedi PIANO.md): giochi contro la casa, Roulette russa, Dadi, Sasso carta forbice.
+   15/11 sera, decisione del proprietario: anche i cinque giochi di carte (Poker 1v1, Poker a 5, Blackjack 1v1,
+   Sette e mezzo, Mano sul mazzo) entrano, solo gratis. Nomi visibili neutri.
    min/max = giocatori; durata = minuti indicativi (stime dove il catalogo non la dice);
    bot = esiste l'allenamento coi bot; ban = c'e' il banner 16:9 per il carosello. */
 window.GX_CATEGORIE = [
@@ -17,7 +18,7 @@ window.GX_CATEGORIE = [
 
 window.GX_GIOCHI = [
   // ── tempo reale
-  {id:'turf',    cat:'live',  nome:'Gambler City Royale', sotto:'Battle royale in città', min:2, max:10, durata:'~6 min', bot:true, ban:false /* banner con insegna «Gambler Bot Casinò 777»: da rifare */,
+  {id:'turf',    cat:'live',  nome:'City Royale', sotto:'Battle royale in città', min:2, max:10, durata:'~6 min', bot:true, ban:false /* banner da rifare */,
    descr:'Battle royale dall\'alto: armi, auto, covi e una zona che brucia e si stringe. Vince l\'ultimo in piedi.'},
   {id:'race',    cat:'live',  nome:'Street Race', sotto:'Piste sempre nuove, derapate e boost', min:2, max:10, durata:'~3 min', bot:true, ban:true,
    descr:'Corse su piste generate ogni volta: derapate, boost e scie. Ognuno personalizza la sua auto.'},
@@ -25,8 +26,8 @@ window.GX_GIOCHI = [
    descr:'Tutti contro tutti nell\'arena con spada, scudo e parata al momento giusto. L\'ultimo in piedi vince.'},
   {id:'scalata', cat:'live',  nome:'Dead Peak', sotto:'Scalata con trappole e lava', min:2, max:10, durata:'~3 min', bot:true, ban:true,
    descr:'Corsa verso la vetta: trappole a ritmo, spinte agli avversari e lava che sale. Il primo in cima vince.'},
-  {id:'smash',   cat:'live',  nome:'Gambler Smash', sotto:'Picchiaduro: buttali fuori', min:2, max:4, durata:'~4 min', bot:true, ban:true,
-   descr:'Il picchiaduro di Gambler: tanti lottatori, arene diverse, tre vite a testa. Buttali fuori dal ring.'},
+  {id:'smash',   cat:'live',  nome:'Smash', sotto:'Picchiaduro: buttali fuori', min:2, max:4, durata:'~4 min', bot:true, ban:true,
+   descr:'Il picchiaduro: tanti lottatori, arene diverse, tre vite a testa. Buttali fuori dal ring.'},
   {id:'tank',    cat:'live',  nome:'Tank Duel', sotto:'Carri armati, uno contro uno', min:2, max:2, durata:'~2 min', bot:false,
    descr:'Due carri armati, sponde e missili. Chi colpisce per primo l\'altro tre volte vince.'},
   {id:'alley',   cat:'live',  nome:'Vicoli', sotto:'Dinamite nel cantiere, una vita', min:2, max:2, durata:'~90 s', bot:true,
@@ -38,7 +39,7 @@ window.GX_GIOCHI = [
   // ── carte
   {id:'uno',     cat:'carte', nome:'UNO', sotto:'Classico o No Mercy', min:2, max:10, durata:'~8 min', bot:true, ban:true,
    descr:'Classico o No Mercy, da 2 a 10 al tavolo. Si sceglie il mazzo prima di sedersi.'},
-  {id:'cucu',    cat:'carte', nome:'Cucù', sotto:'Una carta a testa: tienila o passala', min:2, max:10, durata:'~5 min', bot:true, ban:false /* banner con casinò/fiche/monete: da rifare */,
+  {id:'cucu',    cat:'carte', nome:'Cucù', sotto:'Una carta a testa: tienila o passala', min:2, max:10, durata:'~5 min', bot:true, ban:false /* banner da rifare */,
    descr:'Una carta a testa: la tieni o la passi al vicino. Chi resta con la più bassa perde una vita.'},
   {id:'uomonero',cat:'carte', nome:'Uomo Nero', sotto:'Scarta le coppie, non restare col nero', min:3, max:8, durata:'~3 min', bot:true, ban:true,
    descr:'Si scartano le coppie e si pesca dal vicino. Chi resta con l\'Uomo Nero in mano ha perso.'},
@@ -48,14 +49,24 @@ window.GX_GIOCHI = [
    descr:'La classica con le napoletane: carte, denari, settebello e primiera.'},
   {id:'briscola',cat:'carte', nome:'Briscola', sotto:'Le napoletane: 61 per vincere', min:2, max:2, durata:'~3 min', bot:false,
    descr:'Briscola a due con le napoletane. Servono 61 punti per vincere la mano.'},
+  {id:'pk1v1',   cat:'carte', nome:'Poker 1v1', sotto:'Testa a testa, Texas hold’em', min:2, max:2, durata:'~6 min', bot:false,
+   descr:'Texas hold’em a due. Si parte pari con lo stesso numero di punti: vince chi li prende tutti.'},
+  {id:'pk5',     cat:'carte', nome:'Poker a 5', sotto:'Tavolo da cinque, ti siedi quando vuoi', min:2, max:5, durata:'~15 min', bot:false,
+   descr:'Poker all’italiana fino a cinque al tavolo. Si gioca per il gusto della mano: niente in palio.'},
+  {id:'bj1v1',   cat:'carte', nome:'Blackjack 1v1', sotto:'Chi si avvicina di più a 21', min:2, max:2, durata:'~4 min', bot:false,
+   descr:'Due giocatori, un mazzo: carta o stai. Chi arriva più vicino a 21 senza sballare vince la mano.'},
+  {id:'settemezzo',cat:'carte',nome:'Sette e mezzo', sotto:'Carta o sto? Senza banco', min:2, max:6, durata:'~5 min', bot:false,
+   descr:'Il classico con le napoletane, senza banco: carta o sto, e chi sballa oltre sette e mezzo è fuori dalla mano.'},
+  {id:'tappo',   cat:'carte', nome:'Mano sul mazzo', sotto:'Quattro uguali, poi la mano sul mazzo', min:2, max:7, durata:'~4 min', bot:false,
+   descr:'Si passano le carte in giro finché qualcuno fa quattro uguali: allora tutti giù con la mano sul mazzo, l’ultimo perde.'},
   // ── party
-  {id:'lupus',   cat:'party', nome:'Lupus in Gambler', sotto:'Lupi contro villaggio', min:5, max:10, durata:'~15 min', bot:true, ban:false /* banner: il robot ha occhi a bitcoin, da rifare */,
+  {id:'lupus',   cat:'party', nome:'Lupus', sotto:'Lupi contro villaggio', min:5, max:10, durata:'~15 min', bot:true, ban:false /* banner da rifare */,
    descr:'Di notte il lupo sbrana, di giorno il villaggio processa. Bugie, accuse e voti: perfetto col vocale aperto.'},
-  {id:'lastcall',cat:'party', nome:'Last Call', sotto:'Peschi finché non ti becca il buttafuori', min:2, max:7, durata:'~5 min', bot:true, ban:false /* banner con casinò/fiche/monete: da rifare */,
+  {id:'lastcall',cat:'party', nome:'Last Call', sotto:'Peschi finché non ti becca il buttafuori', min:2, max:7, durata:'~5 min', bot:true, ban:false /* banner da rifare */,
    descr:'Peschi finché non ti becca il buttafuori; la mazzetta lo ferma. Chi resta in piedi vince.'},
-  {id:'geo',     cat:'party', nome:'Geo Bet', sotto:'Indovina dove sei', min:2, max:8, durata:'~5 min', bot:false, ban:false /* banner con casinò/fiche/monete: da rifare */,
+  {id:'geo',     cat:'party', nome:'Geo', sotto:'Indovina dove sei', min:2, max:8, durata:'~5 min', bot:false, ban:false /* banner da rifare */,
    descr:'Una foto da un posto del mondo: indovina dove sei. Il più vicino fa più punti.'},
-  {id:'deadmoney',cat:'party',nome:'Dead Money', sotto:'Il quiz dove chi sbaglia muore', min:3, max:8, durata:'~15 min', bot:false, ban:false /* banner con casinò/fiche/monete: da rifare */,
+  {id:'deadmoney',cat:'party',nome:'Dead Quiz', sotto:'Il quiz dove chi sbaglia muore', min:3, max:8, durata:'~15 min', bot:false, ban:false /* banner da rifare */,
    descr:'Un quiz in un hotel maledetto: chi sbaglia muore, i fantasmi continuano a giocare. Chi scappa vince.'},
   // ── tavolo
   {id:'kaiju',   cat:'tavolo',nome:'Kaiju Battle', sotto:'Dadi, mostri e una città da prendere', min:2, max:5, durata:'~10 min', bot:false, ban:true,

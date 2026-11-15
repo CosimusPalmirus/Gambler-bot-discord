@@ -277,3 +277,8 @@ html.modo-pip .pip{display:flex;position:fixed;inset:0;align-items:center;gap:14
   .slide{flex-basis:calc((100% - 36px) / 3.2)}
   .titoli p{display:none}
 }
+/* sala: interruttore «posti vuoti ai bot» (giochi da 2 a 4) */
+.sala .s-bot{position:relative;padding-left:44px}
+.sala .s-bot::before{content:"";position:absolute;left:14px;top:50%;width:20px;height:12px;margin-top:-6px;border-radius:99px;background:var(--x-grey3)}
+.sala .s-bot::after{content:"";position:absolute;left:16px;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:#fff;transition:transform .18s var(--x-molla)}
+.sala .s-bot.on::before{background:var(--x-verde)}.sala .s-bot.on::after{transform:translateX(8px)}

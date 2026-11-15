@@ -5,12 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Giochi del canale</title>
 <link rel="icon" href="data:,">
+<meta name="referrer" content="no-referrer">
 <link rel="stylesheet" href="stile.css">
-<script>
-  /* Quando ci sara' l'app sul Developer Portal: mettere qui il client_id (pubblico, non e' un segreto).
-     Vuoto = prototipo con dati finti. */
-  window.GX_CONFIG = { clientId: '', tokenUrl: '/api/discord/token', avatarPrefix: '/avatar' };
-</script>
+<script src="config.js"></script>
 </head>
 <body>
 <div class="velo-fondo"></div>
@@ -88,6 +85,7 @@
     <ul class="posti" id="s-posti"></ul>
     <div class="tasti">
       <button class="t1" id="s-via" type="button">Inizia la partita</button>
+      <button class="t2 s-bot" id="s-bot" type="button" aria-pressed="true" style="display:none">Posti vuoti ai bot</button>
       <button class="t2" id="s-esci" type="button">Esci</button>
     </div>
   </div>
@@ -124,6 +122,7 @@
 
 <div class="toast" id="toast" role="status"></div>
 
+<script src="giochi/tg-shim.js"></script>
 <script src="giochi.js"></script>
 <script src="discord.js"></script>
 <script src="app.js"></script>
