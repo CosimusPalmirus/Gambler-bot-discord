@@ -282,3 +282,7 @@ html.modo-pip .pip{display:flex;position:fixed;inset:0;align-items:center;gap:14
 .sala .s-bot::before{content:"";position:absolute;left:14px;top:50%;width:20px;height:12px;margin-top:-6px;border-radius:99px;background:var(--x-grey3)}
 .sala .s-bot::after{content:"";position:absolute;left:16px;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:#fff;transition:transform .18s var(--x-molla)}
 .sala .s-bot.on::before{background:var(--x-verde)}.sala .s-bot.on::after{transform:translateX(8px)}
+/* trascinare col mouse (PC): niente aggancio durante il trascinamento, cursore a mano */
+@media (pointer:fine){.carosello,.filtri,.facce{cursor:grab}.carosello img{-webkit-user-drag:none;user-select:none}}
+.trascino{cursor:grabbing!important;scroll-snap-type:none!important;scroll-behavior:auto!important;user-select:none}
+.trascino *{pointer-events:none}

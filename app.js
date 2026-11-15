@@ -69,6 +69,42 @@
     }, 6000);
   }
 
+  /* ───────── trascina col mouse le file che scorrono di lato (carosello, filtri, facce) ───────── */
+  (function () {
+    var SEL = '.carosello,.filtri,.facce', d = null, blocca = false;
+    document.addEventListener('dragstart', function (e) { if (e.target.closest && e.target.closest(SEL)) e.preventDefault(); });
+    document.addEventListener('pointerdown', function (e) {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      var el = e.target.closest && e.target.closest(SEL);
+      if (!el || el.scrollWidth <= el.clientWidth) return;
+      d = {el: el, x: e.clientX, sl: el.scrollLeft, mosso: false, id: e.pointerId};
+    });
+    document.addEventListener('pointermove', function (e) {
+      if (!d || e.pointerId !== d.id) return;
+      var dx = e.clientX - d.x;
+      if (!d.mosso && Math.abs(dx) < 6) return;
+      if (!d.mosso) { d.mosso = true; d.el.classList.add('trascino'); }
+      d.el.scrollLeft = d.sl - dx;
+      e.preventDefault();
+    });
+    function fine() {
+      if (!d) return;
+      if (d.mosso) {
+        blocca = true; setTimeout(function () { blocca = false; }, 0);
+        var el = d.el; el.classList.remove('trascino');
+        var p = el.firstElementChild;
+        if (el.classList.contains('carosello') && p) {          // si ferma sulla lastra piu' vicina
+          var w = p.offsetWidth + 12;
+          el.scrollTo({left: Math.round(el.scrollLeft / w) * w, behavior: 'smooth'});
+        }
+      }
+      d = null;
+    }
+    document.addEventListener('pointerup', fine);
+    document.addEventListener('pointercancel', fine);
+    document.addEventListener('click', function (e) { if (blocca) { e.stopPropagation(); e.preventDefault(); blocca = false; } }, true);
+  })();
+
   /* ───────── filtri e ricerca ───────── */
   function disegnaFiltri() {
     var n = stato.gente.length;
