@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Giochi del canale</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="stile.css">
+<script>
+  /* Quando ci sara' l'app sul Developer Portal: mettere qui il client_id (pubblico, non e' un segreto).
+     Vuoto = prototipo con dati finti. */
+  window.GX_CONFIG = { clientId: '', tokenUrl: '/api/discord/token', avatarPrefix: '/avatar' };
+</script>
+</head>
+<body>
+<div class="velo-fondo"></div>
+
+<div class="pagina" id="pagina">
+  <header class="testa">
+    <div class="titoli">
+      <h1>Giochi</h1>
+      <p id="sottotitolo">Giochi gratis da fare insieme, qui nel canale.</p>
+    </div>
+    <section class="canale x-lastra" aria-label="Chi è nel canale">
+      <div class="lab"><b><i class="pallino"></i><span id="n-canale">0</span>&nbsp;nel canale</b><span id="nome-canale">Vocale</span></div>
+      <div class="facce" id="facce"></div>
+    </section>
+  </header>
+
+  <div class="carosello" id="carosello" aria-label="In evidenza"></div>
+  <div class="puntini" id="puntini"></div>
+
+  <div class="strumenti" id="strumenti">
+    <label class="cerca">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
+      <input id="cerca" type="search" placeholder="Cerca un gioco" autocomplete="off" spellcheck="false">
+      <button class="via nascosto" id="via" type="button" aria-label="Cancella"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </label>
+    <div class="filtri" id="filtri" role="tablist"></div>
+  </div>
+
+  <div id="catalogo"></div>
+  <p class="piede">Tutti i giochi qui sono gratis: niente soldi, niente premi, si gioca per divertirsi.</p>
+</div>
+
+<!-- foglio del gioco -->
+<div class="velo" id="velo" aria-hidden="true">
+  <div class="foglio x-lastra" role="dialog" aria-modal="true" aria-labelledby="f-nome">
+    <div class="f-arte" id="f-arte">
+      <button class="chiudi" id="chiudi" type="button" aria-label="Chiudi">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="f-corpo">
+      <div class="f-cat" id="f-cat"></div>
+      <h2 id="f-nome"></h2>
+      <p id="f-descr"></p>
+      <div class="fatti x-lastra">
+        <div><b id="f-gioc"></b><span>giocatori</span></div>
+        <div><b id="f-dur"></b><span>durata</span></div>
+        <div><b id="f-bot"></b><span>bot</span></div>
+      </div>
+      <div class="nota">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 5 18.5V20"/><circle cx="11" cy="8" r="3.5"/><path d="M20 20v-1.5a3.5 3.5 0 0 0-2.5-3.35M15.5 4.6a3.5 3.5 0 0 1 0 6.8"/></svg>
+        <span id="f-nota"></span>
+      </div>
+      <div class="tasti">
+        <button class="t1" id="t-canale" type="button">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>
+          Gioca con il canale
+        </button>
+        <button class="t2" id="t-coda" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
+          Cerca avversari
+        </button>
+        <button class="t2" id="t-bot" type="button"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- sala d'attesa -->
+<div class="sala" id="sala" aria-hidden="true">
+  <div class="sala-box x-lastra">
+    <div class="ico" id="s-ico"></div>
+    <h3 id="s-nome"></h3>
+    <p class="st" id="s-stato"></p>
+    <ul class="posti" id="s-posti"></ul>
+    <div class="tasti">
+      <button class="t1" id="s-via" type="button">Inizia la partita</button>
+      <button class="t2" id="s-esci" type="button">Esci</button>
+    </div>
+  </div>
+</div>
+
+<!-- coda gratis pubblica: avversari sconosciuti, non del canale -->
+<div class="coda" id="coda" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="c-titolo">
+  <div class="coda-box">
+    <div class="anello" id="c-anello">
+      <i class="onda"></i><i class="onda o2"></i>
+      <div class="vetro"><div class="ico" id="c-ico"></div></div>
+    </div>
+    <div class="c-gioco" id="c-gioco"></div>
+    <h3 id="c-titolo">Cerco avversari</h3>
+    <div class="c-tempo" id="c-tempo">0:00</div>
+    <p class="c-info" id="c-info"></p>
+    <div class="c-trovati" id="c-trovati"></div>
+    <div class="tasti">
+      <button class="t2" id="c-annulla" type="button">Annulla</button>
+    </div>
+  </div>
+</div>
+
+<!-- finestrella di Discord (PIP) -->
+<div class="pip" id="pip">
+  <div class="ico" id="p-ico"></div>
+  <div class="p-tx">
+    <small id="p-sopra">Nel canale</small>
+    <b id="p-nome">Giochi</b>
+    <span id="p-stato">Apri l'attività per scegliere un gioco</span>
+    <div class="p-facce" id="p-facce"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="giochi.js"></script>
+<script src="discord.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
