@@ -6,5 +6,7 @@ window.GX_CONFIG = {
   clientId: '1571636314166534255',
   apiBase: '/api',
   avatarPrefix: '/avatar',
-  giochiAttivi: ['pong', 'smash']
+  giochiAttivi: ['pong', 'smash', 'sumo', 'snake', 'basket', 'archery', 'draw'],
+  // fase 2: questi si aprono dalla mini app online (app.html + URL mapping /app)
+  giochiApp: ['sumo', 'snake', 'basket', 'archery', 'draw']
 };

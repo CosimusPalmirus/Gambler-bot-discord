@@ -207,7 +207,8 @@
       pratica: !!opz.pratica, persone: stato.gente.concat(opz.avversari || []),
       onFine: function (r) {
         stato.inGioco = null; disegnaPip();
-        if (r && r.ancora) { if (opz.pratica) apriSala(g, 'bot'); else apri(g.id); }
+        // «Ancora»/«Rivincita»: si riparte dallo stesso posto (allenamento, sala del canale, coda pubblica)
+        if (r && r.ancora) { if (opz.pratica) apriSala(g, 'bot'); else if (opz.modo === 'canale') apriSala(g, 'canale'); else if (opz.modo === 'coda') apriCoda(g); else apri(g.id); }
       }
     }).catch(function (e) { stato.inGioco = null; toast('Il gioco non si apre, riprova.'); window.GXD.avvisi.push('apriGioco ' + g.id + ': ' + ((e && e.message) || e)); diagnosi(); disegnaPip(); });
   }
@@ -235,7 +236,7 @@
         disegnaSala();
       } else if (m.stato === 'via') {
         S.h = null; chiudiSala();
-        avviaGioco(g, m.ticket, {avversari: m.avversari});
+        avviaGioco(g, m.ticket, {avversari: m.avversari, modo: 'canale'});
       } else if (m.stato === 'errore') {
         S.h = null; chiudiSala(); errore(m.errore);
       }
@@ -294,7 +295,7 @@
       $('s-posti').innerHTML = S.posti.map(function (x) {
         var io = stato.io && x.p.id === stato.io.id;
         return '<li>' + avatar(x.p) + '<b>' + esc(io ? x.p.nome + ' (tu)' : x.p.nome) + '</b><span class="st ok">pronto</span></li>';
-      }).join('') + (manca ? '<li class="guarda"><span class="av" style="background:#3a3a3c">?</span><b>Posto libero</b><span class="st">chi apre Neon Pong nel canale entra qui</span></li>' : '');
+      }).join('') + (manca ? '<li class="guarda"><span class="av" style="background:#3a3a3c">?</span><b>Posto libero</b><span class="st">chi apre ' + esc(S.g.nome) + ' nel canale entra qui</span></li>' : '');
       disegnaPip();
       return;
     }
@@ -377,7 +378,7 @@
     C.via = setInterval(function () {
       n--;
       if (n > 0) { $('c-tempo').textContent = 'Si parte tra ' + n; disegnaPip(); return; }
-      if (window.GXD.vero && m.ticket) { C.trovataVera = true; chiudiCoda(); avviaGioco(C.g, m.ticket, {avversari: m.avversari}); return; }
+      if (window.GXD.vero && m.ticket) { C.trovataVera = true; chiudiCoda(); avviaGioco(C.g, m.ticket, {avversari: m.avversari, modo: 'coda'}); return; }
       chiudiCoda('Prototipo: qui parte ' + C.g.nome + ' con ' + m.avversari.map(function (p) { return p.nome; }).join(', ') + '.');
     }, 1000);
     disegnaPip();
@@ -433,7 +434,7 @@
   });
   $('velo').addEventListener('click', function (e) { if (e.target === this) chiudi(); });
   $('chiudi').addEventListener('click', chiudi);
-  $('t-canale').addEventListener('click', function () { var g = stato.aperto; chiudi(); apriSala(g, 'canale'); });
+  $('t-canale').addEventListener('click', function () { var g = stato.aperto; if (!g) return; chiudi(); apriSala(g, 'canale'); });
   $('t-bot').addEventListener('click', function () {
     var g = stato.aperto; if (!g || !g.bot) return; chiudi();
     if (window.GXD.praticaLocale(g.id)) { avviaGioco(g, null, {pratica: true}); return; }   // anche fuori da Discord

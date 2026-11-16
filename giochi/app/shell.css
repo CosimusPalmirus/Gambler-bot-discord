@@ -1,0 +1,17 @@
+/* DISCORD fase 2 — CSS dello strato Discord sulla mini app (in fondo, vince su quello dell'index) */
+html.gxdc .bnav,html.gxdc #bnav,html.gxdc .bottom-nav{display:none!important}
+html.gxdc #onboard{display:none!important}
+/* niente soldi a schermo: saldo nell'intestazione della partita, «gioca vera» dopo l'allenamento */
+html.gxdc #arc-bal,html.gxdc .game-bal{display:none!important}
+html.gxdc [onclick*="rtdPracToReal"],html.gxdc [onclick*="PracToReal"]{display:none!important}
+/* finestrella di Discord (PIP, ~400x225) o finestra bassa: solo campo + punteggio */
+@media (max-height:300px){
+  html.gxdc #arc .game-hdr,html.gxdc #arc-status,html.gxdc #arc-draghint,html.gxdc #eb-esci,html.gxdc #gx-esci,html.gxdc .xpc-guida,
+  html.gxdc .xpc-btn,html.gxdc #toast{display:none!important}
+  html.gxdc #arc-body{top:0!important;padding-top:2px!important}
+  html.gxdc #arc-hud{transform:scale(.8);transform-origin:50% 0;margin-bottom:-6px}
+  /* le tele quadrate (Sumo) o alte nascevano piu' alte della finestrella: stanno nell'altezza, in proporzione */
+  html.gxdc #arc-cv{max-height:calc(100vh - 60px)!important;width:auto!important;height:auto!important;max-width:100%!important}
+}
+/* scheda di fine: niente riga dei soldi (in Discord e' sempre gratis); pillole rimaste vuote dopo la pulizia dei testi */
+html.gxdc .gbf-soldi,html.gxdc .gbf-stato:empty,html.gxdc .gbf-pill:empty,html.gxdc .gbf-chip:empty{display:none!important}

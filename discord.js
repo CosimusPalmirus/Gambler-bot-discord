@@ -19,6 +19,8 @@
   var API = CFG.apiBase || '/api';
   var AVATAR_PREFIX = CFG.avatarPrefix || '/avatar';
   var GIOCHI_ATTIVI = CFG.giochiAttivi || ['pong'];
+  // fase 2: i giochi che si aprono dalla MINI APP online (app.html, mapping /app) invece che da un client nostro
+  var GIOCHI_APP = CFG.giochiApp || [];
 
   var q = new URLSearchParams(location.search);
   var dentroDiscord = q.has('frame_id') && q.has('instance_id');
@@ -200,6 +202,9 @@
       return caricaGioco(gioco).then(function () {
         var proto = location.protocol === 'https:' ? 'wss://' : 'ws://';
         var wsUrl = CFG.wsUrl || (proto + location.host + API + '/turfws');
+        if (GIOCHI_APP.indexOf(gioco) >= 0 && window.GXApp) {
+          return window.GXApp.avvia({gioco: gioco, ticket: ticket, pratica: !!opz.pratica, onFine: opz.onFine});
+        }
         if (gioco === 'smash' && window.GXSmash) {
           // Smash: la pagina del gioco (arena.html) in un iframe; l'allenamento coi bot gira tutto li' dentro
           return window.GXSmash.avvia({pratica: !!opz.pratica, ticket: ticket, sessione: GXD.sessione, wsUrl: wsUrl,
@@ -221,6 +226,7 @@
 
   var caricati = {};
   function caricaGioco(gioco) {
+    if (GIOCHI_APP.indexOf(gioco) >= 0) gioco = 'app';
     if (caricati[gioco]) return caricati[gioco];
     caricati[gioco] = new Promise(function (ok, ko) {
       var c = document.createElement('link'); c.rel = 'stylesheet'; c.href = 'giochi/' + gioco + '/' + gioco + '.css?v=1611c';
