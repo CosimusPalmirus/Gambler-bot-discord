@@ -52,7 +52,17 @@
     var $ = function (s) { return root.querySelector(s); };
     function stato(t) { var s = $('.sm-stato'); s.textContent = t || ''; s.style.display = t ? '' : 'none'; }
     stato(o.pratica ? '' : 'Mi collego al tavolo…');
-    fr.src = 'arena.html?' + (o.pratica ? '' : 'guscio=1&') + 'lang=it';
+    fr.src = 'arena.html?' + (o.pratica ? '' : 'guscio=1&') + 'lang=it&v=1611c';
+    // 16/11 diagnosi: la cartella del gioco arriva dalla URL mapping /smash? e l'arena risponde?
+    (function () {
+      var G = window.GXD || {}, d = function (t) { (G.avvisi = G.avvisi || []).push('smash: ' + t); if (window.GXDiagnosi) window.GXDiagnosi(); };
+      try {
+        fetch('smash/roster.js?v=ec4e2a7b64d4', {cache: 'no-store'}).then(function (r) {
+          if (!r.ok) d('file del gioco ' + r.status + ' (URL mapping /smash?)');
+        }, function (e) { d('file del gioco non raggiungibili: ' + (e && e.message)); });
+      } catch (e) { d('fetch: ' + e.message); }
+      setTimeout(function () { if (!S.chiuso && !S.pronto) d('arena ferma dopo 25 s'); }, 25000);
+    })();
 
     function posta(m) { try { fr.contentWindow.postMessage({gs: 'giu', m: m}, ORIGINE); } catch (e) {} }
     function giu(m) {

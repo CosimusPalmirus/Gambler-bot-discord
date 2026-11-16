@@ -223,9 +223,9 @@
   function caricaGioco(gioco) {
     if (caricati[gioco]) return caricati[gioco];
     caricati[gioco] = new Promise(function (ok, ko) {
-      var c = document.createElement('link'); c.rel = 'stylesheet'; c.href = 'giochi/' + gioco + '/' + gioco + '.css';
+      var c = document.createElement('link'); c.rel = 'stylesheet'; c.href = 'giochi/' + gioco + '/' + gioco + '.css?v=1611c';
       document.head.appendChild(c);
-      var s = document.createElement('script'); s.src = 'giochi/' + gioco + '/' + gioco + '.js';
+      var s = document.createElement('script'); s.src = 'giochi/' + gioco + '/' + gioco + '.js?v=1611c';
       s.onload = ok; s.onerror = function () { caricati[gioco] = null; ko(new Error('gioco non trovato')); };
       document.head.appendChild(s);
     });
