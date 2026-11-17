@@ -49,5 +49,57 @@
   /* PER IL LOTTO 2 (Scopa, nell'index): stesso mazzo, stesse monete col ₿. Proposta: l'integratore decide se tenerla. */
   {nome: 'L6 denari senza bitcoin (scopa, lotto 2)', pagina: 'index.html',
    re: /im\.src='carte\/'\+\(c==='dorso'\?'dorso':\(c<10\?'0'\+c:''\+c\)\)\+'\.webp';/,
-   con: "im.src=(c!=='dorso'&&c<10?(window.GXDC_RADICE||'/')+'giochi/carte_dc/0'+c:'carte/'+c)+'.webp';   /* DISCORD L6 */"}
+   con: "im.src=(c!=='dorso'&&c<10?(window.GXDC_RADICE||'/')+'giochi/carte_dc/0'+c:'carte/'+c)+'.webp';   /* DISCORD L6 */"},
+/* pc_fix (17/11) */
+/* LUPUS su PC: la tela 3D si misura sul suo riquadro (#scena) invece che su #app. Sul telefono #scena e' #app
+     (inset:0): stessa misura di prima. Su PC (extra.css pc_fix) #scena e' il borgo a sinistra e #app la colonna a destra. */
+  {nome: 'PC lupus ridimensiona', pagina: 'lupus3d.html',
+   re: /var app = \$\("#app"\), w = app\.clientWidth, h = app\.clientHeight;/,
+   con: 'var app = $("#scena") || $("#app"), w = app.clientWidth, h = app.clientHeight;   /* DISCORD pc_fix */'},
+/* LAST CALL: le illustrazioni con fiche, monete, banconote, occhi a Bitcoin/Ethereum e la G del marchio sul cilindro
+     -> ridisegnate neutre (stessa mano, stessa inquadratura) in giochi/lastcall_dc/; le icone d'angolo a fiche/banconota
+     in giochi/lastcall_dc/ic/. Le altre carte restano quelle della mini app. Due caricatori (pagina sola / guscio). */
+  {nome: 'PC lastcall arte neutra 1', pagina: 'lastcall.html',
+   re: /carica\(LC_DIR \+ id \+ '\.webp', function \(im\) \{ lcArte\(id, im\); \}\);\n(\s*)carica\(LC_DIR \+ 'ic\/' \+ id \+ '\.png', function \(im\) \{ lcIcona\(id, im\); \}\);/,
+   con: "carica((/^(bancarotta|buttafuori|conto_aperto|contromano|dal_fondo|impila_due|jolly|mazzetta|occhi_chiusi|paga_tu|pago_io|passo|primo_ultimo|raddoppio|rimescola|sangue_freddo|sbircia|sbircia_due|segnato|sottobanco|tok_bandiera|tok_caveau|tok_citta|tok_colosseo|tok_ring|ultimo_ordine)$/.test(id) ? (window.GXDC_RADICE || '/') + 'giochi/lastcall_dc/' : LC_DIR) + id + '.webp', function (im) { lcArte(id, im); });   /* DISCORD pc_fix */\n$1carica((/^(jolly|mazzetta|tok_bandiera|tok_caveau|tok_citta|tok_colosseo|tok_ring)$/.test(id) ? (window.GXDC_RADICE || '/') + 'giochi/lastcall_dc/' : LC_DIR) + 'ic/' + id + '.png', function (im) { lcIcona(id, im); });"},
+  {nome: 'PC lastcall arte neutra 2', pagina: 'lastcall.html',
+   re: /carica\(LC_DIR \+ id \+ "\.webp" \+ V, function \(im\) \{ lcArte\(id, im\); \}\);\n(\s*)carica\(LC_DIR \+ "ic\/" \+ id \+ "\.png" \+ V, function \(im\) \{ lcIcona\(id, im\); \}\);/,
+   con: "carica((/^(bancarotta|buttafuori|conto_aperto|contromano|dal_fondo|impila_due|jolly|mazzetta|occhi_chiusi|paga_tu|pago_io|passo|primo_ultimo|raddoppio|rimescola|sangue_freddo|sbircia|sbircia_due|segnato|sottobanco|tok_bandiera|tok_caveau|tok_citta|tok_colosseo|tok_ring|ultimo_ordine)$/.test(id) ? (window.GXDC_RADICE || '/') + 'giochi/lastcall_dc/' : LC_DIR) + id + '.webp' + V, function (im) { lcArte(id, im); });   /* DISCORD pc_fix */\n$1carica((/^(jolly|mazzetta|tok_bandiera|tok_caveau|tok_citta|tok_colosseo|tok_ring)$/.test(id) ? (window.GXDC_RADICE || '/') + 'giochi/lastcall_dc/' : LC_DIR) + 'ic/' + id + '.png' + V, function (im) { lcIcona(id, im); });"},
+/* DEAD QUIZ: avatar e stanze con slot, dadi, fiche, monete e banconote, il logo DEAD MONEY con la fiche -> versioni neutre
+     (stessa mano) in giochi/deadmoney_dc/. Tutte le immagini della pagina passano da dmUrl. */
+  {nome: 'PC deadmoney arte neutra', pagina: 'deadmoney.html',
+   re: /const dmUrl = rel => DM_LOTTI\[rel\] \|\| \("dm_asset\/" \+ rel\);/,
+   con: "const dmUrl = rel => (/^img\\/(bg_sala|bg_salone|bot_03|bot_06|bot_10|bot_12|host_soldi|logo|sala_avidita|sala_bj|sala_conta|sala_dadi|sala_duello|sala_gratta|sala_memoria|sala_plinko|sala_prendi)\\.webp$/.test(rel) ? (window.GXDC_RADICE || '/') + 'giochi/deadmoney_dc/' + rel.slice(4) : (DM_LOTTI[rel] || (\"dm_asset/\" + rel)));   /* DISCORD pc_fix */"},
+/* LUPUS: la faccia dei robot (medaglioni sopra le case, robot del borgo) aveva gli occhi a moneta Bitcoin/Ethereum:
+     dentro Discord due occhi luminosi verdi con la pupilla (stessa misura, stesso alone). */
+  {nome: 'PC lupus occhi senza cripto', pagina: 'lupus3d.html',
+   re: /\/\* occhio sinistro: Bitcoin oro \*\/[\s\S]*?\/\* riflesso vetro \(ellipse/,
+   con: "/* DISCORD pc_fix: occhi luminosi (niente Bitcoin/Ethereum) */\n    [exL, exR].forEach(function (ox) {\n        alone(ox, ey, er, \"rgba(80,230,150,0.75)\");\n        var mg = g.createRadialGradient(ox - 9, ey - 9, 4, ox, ey, er);\n        mg.addColorStop(0, \"#d8ffe9\"); mg.addColorStop(0.55, \"#5fe39a\"); mg.addColorStop(1, \"#1b7a48\");\n        g.fillStyle = mg; g.beginPath(); g.arc(ox, ey, er, 0, Math.PI * 2); g.fill();\n        g.lineWidth = 4; g.strokeStyle = \"#dffbea\"; g.stroke();\n        g.fillStyle = \"#0c1a14\"; g.beginPath(); g.arc(ox + 3, ey + 3, er * 0.42, 0, Math.PI * 2); g.fill();\n    });\n\n    /* riflesso vetro (ellipse"},
+/* LUPUS: il ruolo del borgo senza poteri si chiamava «Gambler» (il marchio): dentro Discord «Paesano» */
+  {nome: 'PC lupus ruolo paesano 1', pagina: 'lupus3d.html',
+   re: /nome: "Gambler", squadra: "borgo", posti: 1, min: 5,/, con: 'nome: "Paesano", squadra: "borgo", posti: 1, min: 5,'},
+  {nome: 'PC lupus ruolo paesano 2', pagina: 'lupus3d.html',
+   re: /t: "IL GAMBLER", i: "B", c: "#4a3f68"/, con: 't: "IL PAESANO", i: "P", c: "#4a3f68"'},
+  {nome: 'PC lupus ruolo paesano 3', pagina: 'lupus3d.html',
+   re: /id="sRuolo">sei un <b>GAMBLER<\/b>/, con: 'id="sRuolo">sei un <b>PAESANO</b>'},
+  {nome: 'PC lupus ruolo paesano 4', pagina: 'lupus3d.html',
+   re: /n === "Gambler"\) \{ return ecoL\("sei un <b>GAMBLER<\/b>"\); \}/, con: 'n === "Gambler" || n === "Paesano") { return ecoL("sei un <b>PAESANO</b>"); }'},
+/* SCOPA su PC orizzontale (solo Discord): il tavolo prende la forma dello schermo (rapporto in extra.js pc_fix) e le misure
+     delle carte, che nascevano dalla LARGHEZZA di una tela verticale, si fermano all'altezza. Solo se la tela e' piu'
+     larga che alta: sul telefono (tela verticale) nessuna misura cambia. */
+  {nome: 'PC scopa carte in orizzontale 1', pagina: 'index.html',
+   re: /var cw=Math\.min\(w\*0\.205,\(w-2\*gap-w\*0\.04\)\/Math\.max\(3,handN\)\)\*0\.98,chh=cw\*1\.5;/,
+   con: "var cw=Math.min(w*0.205,(w-2*gap-w*0.04)/Math.max(3,handN))*0.98,chh=cw*1.5;\n  if(w>hh){cw=Math.min(cw,hh*0.2);chh=cw*1.5;}   /* DISCORD pc_fix */"},
+  {nome: 'PC scopa carte in orizzontale 2', pagina: 'index.html',
+   re: /var rgap=Math\.max\(8,hh\*0\.011\),TWMAX=w\*0\.185;/,
+   con: "var rgap=Math.max(8,hh*0.011),TWMAX=w*0.185;\n  if(w>hh)TWMAX=Math.min(TWMAX,hh*0.17);   /* DISCORD pc_fix */"},
+  {nome: 'PC scopa carte in orizzontale 3', pagina: 'index.html',
+   re: /var dw=Math\.max\(26,w\*0\.088\),dh=dw\*1\.5,margin=Math\.max\(8,w\*0\.025\);\n(\s*)var ow=Math\.max\(24,w\*0\.072\),oh=ow\*1\.5;/,
+   con: "var dw=Math.max(26,w*0.088),dh=dw*1.5,margin=Math.max(8,w*0.025);\n$1var ow=Math.max(24,w*0.072),oh=ow*1.5;\n$1if(w>hh){dw=Math.max(26,hh*0.085);dh=dw*1.5;ow=Math.max(24,hh*0.07);oh=ow*1.5;margin=Math.max(8,hh*0.03);}   /* DISCORD pc_fix */"},
+  {nome: 'PC scopa cornice in orizzontale', pagina: 'index.html',
+   re: /var rail=Math\.max\(6,w\*0\.028\);/,
+   con: "var rail=Math.max(6,(w>hh?hh:w)*0.028);   /* DISCORD pc_fix */"},
+  {nome: 'PC scopa mano sopra la cornice', pagina: 'index.html',
+   re: /var hy=hh-chh-Math\.max\(10,hh\*0\.024\),hx0=w\/2-\(handN\*\(cw\+gap\)-gap\)\/2;/,
+   con: "var hy=hh-chh-Math.max(10,hh*(w>hh?0.045:0.024)),hx0=w/2-(handN*(cw+gap)-gap)/2;   /* DISCORD pc_fix */"}
 ]

@@ -2,7 +2,10 @@
    Fonte: _levelup/restyle_1311/arena_giochi.json + gbx_arena.js (nomi e categorie dell'Arena),
    bot = tabella _PRACTICE_GAMES di backend.py (copia locale, da riconfermare sul VPS).
    Testi riscritti SENZA soldi: niente piatto, posta, premio, commissione.
-   Esclusi apposta (vedi PIANO.md): giochi contro la casa, Roulette russa, Dadi, Sasso carta forbice.
+   Esclusi apposta (vedi PIANO.md): giochi contro la casa.
+   17/11 lotto 9: SBANCA! (artiglieria a turni, colpo grosso a cartoni), solo gratis, mappe e squadre senza casino'.
+   17/11 lotto 8, decisione del proprietario: entrano anche Morra, Roulette russa (con la PISTOLA AD ACQUA: niente
+   armi vere) e Dadi (un duello a round, non un tiro secco). Solo gratis, come tutto il resto.
    15/11 sera, decisione del proprietario: anche i cinque giochi di carte (Poker 1v1, Poker a 5, Blackjack 1v1,
    Sette e mezzo, Mano sul mazzo) entrano, solo gratis. Nomi visibili neutri.
    min/max = giocatori; durata = minuti indicativi (stime dove il catalogo non la dice);
@@ -30,6 +33,8 @@ window.GX_GIOCHI = [
    descr:'Il picchiaduro: tanti lottatori, arene diverse, tre vite a testa. Buttali fuori dal ring.'},
   {id:'tank',    cat:'live',  nome:'Tank Duel', sotto:'Carri armati, uno contro uno', min:2, max:2, durata:'~2 min', bot:true,
    descr:'Due carri armati, sponde e missili. Chi colpisce per primo l\'altro tre volte vince.'},
+  {id:'sbanca',  cat:'live',  nome:'SBANCA!', sotto:'Artiglieria a turni, il terreno si rompe', min:2, max:4, durata:'~6 min', bot:true,
+   descr:'Il colpo grosso a turni: mira, vento e potenza. Ogni esplosione scava il terreno; chi cade in acqua è fuori. Vince l\'ultima squadra in piedi.'},
   {id:'alley',   cat:'live',  nome:'Vicoli', sotto:'Dinamite nel cantiere, una vita', min:2, max:2, durata:'~90 s', bot:true,
    descr:'Un cantiere, la dinamite e una vita sola. Chiudi l\'avversario prima che lui chiuda te.'},
   {id:'snake',   cat:'live',  nome:'Snake Arena', sotto:'Cresci e taglia la strada', min:2, max:2, durata:'~2 min', bot:true,
@@ -51,7 +56,7 @@ window.GX_GIOCHI = [
    descr:'Briscola a due con le napoletane. Servono 61 punti per vincere la mano.'},
   {id:'pk1v1',   cat:'carte', nome:'Poker 1v1', sotto:'Testa a testa, Texas hold’em', min:2, max:2, durata:'~6 min', bot:true,
    descr:'Texas hold’em a due. Si parte pari con lo stesso numero di punti: vince chi li prende tutti.'},
-  {id:'pk5',     cat:'carte', nome:'Poker a 5', sotto:'Tavolo da cinque, ti siedi quando vuoi', min:2, max:5, durata:'~15 min', bot:false,
+  {id:'pk5',     cat:'carte', nome:'Poker a 5', sotto:'Tavolo da cinque, ti siedi quando vuoi', min:2, max:5, durata:'~15 min', bot:true,
    descr:'Poker all’italiana fino a cinque al tavolo. Si gioca per il gusto della mano: niente in palio.'},
   {id:'bj1v1',   cat:'carte', nome:'Blackjack 1v1', sotto:'Chi si avvicina di più a 21', min:2, max:2, durata:'~4 min', bot:true,
    descr:'Due giocatori, un mazzo: carta o stai. Chi arriva più vicino a 21 senza sballare vince la mano.'},
@@ -68,7 +73,13 @@ window.GX_GIOCHI = [
    descr:'Una foto da un posto del mondo: indovina dove sei. Il più vicino fa più punti.'},
   {id:'deadmoney',cat:'party',nome:'Dead Quiz', sotto:'Il quiz dove chi sbaglia muore', min:3, max:8, durata:'~15 min', bot:true, ban:true /* banner nuovo, adatto a Discord (16/11) */,
    descr:'Un quiz in un hotel maledetto: chi sbaglia muore, i fantasmi continuano a giocare. Chi scappa vince.'},
+  {id:'rps',     cat:'party', nome:'Morra', sotto:'Sasso, carta, forbice: al meglio di 3', min:2, max:2, durata:'~1 min', bot:true,
+   descr:'Sasso, carta o forbice: scegliete in segreto e si scopre insieme. Vince chi fa due round.'},
+  {id:'rr',      cat:'party', nome:'Roulette russa', sotto:'Con la pistola ad acqua: chi resta asciutto?', min:2, max:2, durata:'~2 min', bot:true,
+   descr:'Una pistola ad acqua con spruzzi pieni e a vuoto. Spruzzi l’avversario, o rischi tu per tenere il turno. Due cuori a testa: chi resta asciutto vince.'},
   // ── tavolo
+  {id:'dice',    cat:'tavolo',nome:'Dadi', sotto:'Il dado più alto fa punto', min:2, max:2, durata:'~1 min', bot:true,
+   descr:'Tirate tutti e due: il dado più alto fa un punto, a pari si ritira. Chi arriva a 3 vince.'},
   {id:'kaiju',   cat:'tavolo',nome:'Kaiju Battle', sotto:'Dadi, mostri e una città da prendere', min:2, max:5, durata:'~10 min', bot:true, ban:true,
    descr:'Tiri i dadi, picchi chi sta in città e compri poteri. Vince chi arriva a 20 stelle o resta l\'ultimo in piedi.'},
   {id:'pool8',   cat:'tavolo',nome:'Biliardo', sotto:'8-ball vero o 15 rapido', min:2, max:2, durata:'~3 min', bot:true,

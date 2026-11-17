@@ -14,11 +14,11 @@
   'use strict';
   // lotto 3: la stessa macchina carica anche le PAGINE A PARTE della mini app (figlia.html?pg=lupus3d.html?...)
   var PG = new URLSearchParams(location.search).get('pg') || '';
-  var FIGLIA = !!PG && /^[a-z0-9_]+\.html(\?|$)/.test(PG);
+  var FIGLIA = !!PG && /^([a-z0-9_]+\/)?[a-z0-9_]+\.html(\?|$)/.test(PG);   // lotto 9: anche sbanca/sbanca.html
   // la cartella di app.html ('/' dentro Discord); figlia.html sta in giochi/app/
   var radice = FIGLIA ? location.pathname.replace(/giochi\/app\/[^\/]*$/, '') : location.pathname.replace(/[^\/]*$/, '');
   var APP = radice + 'app/';
-  var VER = '20261117geo';
+  var VER = '20261117l9';
   // le librerie che le pagine a parte prendono da un CDN (bloccato dalla CSP di Discord): copie nel repo, vendor/
   var CDN = [
     [/https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/three\.js\/r128\/three\.min\.js/g, 'vendor/three/three.min.js'],
@@ -107,7 +107,9 @@
       window.GXDC_SCRIPT = sb.n;
       // 4) in testa: <base> verso la mini app + lo strato Discord, prima di ogni altro script (la PRIMA <head>
       //    vera: le altre stanno nei commenti dell'index)
-      var testa = '<base href="' + esc(APP) + '">\n<script src="' + blob('window.GXDC_RADICE=' + JSON.stringify(radice) + ';' + (FIGLIA ? 'window.GXDC_FIGLIA=true;' : '') + '\n' + shell) + '"></script>' +
+      // lotto 9: la pagina in una sottocartella (sbanca/sbanca.html) legge arte/... dalla SUA cartella
+      var BASEH = FIGLIA ? APP + PG.split('?')[0].replace(/[^\/]*$/, '') : APP;
+      var testa = '<base href="' + esc(BASEH) + '">\n<script src="' + blob('window.GXDC_RADICE=' + JSON.stringify(radice) + ';' + (FIGLIA ? 'window.GXDC_FIGLIA=true;' : '') + '\n' + shell) + '"></script>' +
         (extra ? '\n<script src="' + blob(extra) + '"></script>' : '') +
         (FIGLIA && r[4] ? '\n<style id="gx-discord-extra">' + r[4] + '</style>' : '') +
         // la schermata di caricamento della mini app ha il marchio (scritta e logo): dentro Discord solo la barra
