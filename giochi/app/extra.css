@@ -401,3 +401,11 @@ html.gxdc.gx-sbanca #arc-prize { display: none !important; }
    centro) copriva «Torna ai giochi» a 1280x720. Solo SBANCA: la regola generica dell'index resta com'e'. */
 html.gxdc.gx-sbanca.gx9-fine .xpc-btn { display: none !important; }
 
+
+/* ── abisso (17/11, abisso_rilascio_1711) · abisso.css ── */
+/* DISCORD (17/11) — NON SVEGLIARE IL DRAGO: il gioco e' una pagina a parte a tutto schermo (iframe del guscio ABRT).
+   Nell'index, durante la ricerca della stanza, la riga del premio della mini app non serve (gratis). */
+html.gxdc.gx-abisso #arc-prize { display: none !important; }
+/* scheda di fine (classe messa da abisso.js su rtdShowOver): il tasto «Tasti» dell'index (.xpc-btn) copriva «Torna ai giochi» */
+html.gxdc.gx-abisso.gxab-fine .xpc-btn { display: none !important; }
+

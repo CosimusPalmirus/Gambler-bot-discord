@@ -2444,3 +2444,74 @@ GXDC_EXTRA('sbanca', {
   }
 });
 
+
+/* ── abisso (17/11, abisso_rilascio_1711) · abisso.js ── */
+/* DISCORD (17/11, abisso_rilascio_1711) — NON SVEGLIARE IL DRAGO («abisso»). SOLO GRATIS, niente parole da casino'.
+   Il gioco vive in una pagina a parte: l'index (guscio ABRT del rilascio Telegram) apre l'iframe
+   «abisso/abisso.html?rt=1&modo=rt&piatt=tg&...»; shell.js lo gira su figlia.html (pagina in PAGINE_EXTRA) e carica.js
+   (lotto 9: pagine anche in una sottocartella) la scrive con lo stesso strato Discord.
+   Nella pagina a parte, PRIMA degli script del gioco: ?piatt=tg -> ?piatt=dc (la pagina non mostra mai posta, piatto,
+   montepremi, euro: solo l'oro del gioco). Nell'index: «rientra» a partita finita non parte; «nessuna partita da
+   riprendere» -> scheda di fine (o catalogo), mai la schermata d'attesa (stessa cura di SBANCA, lotto 9).
+   Niente globali libere, niente eval. */
+GXDC_EXTRA('abisso', {
+  pagina: 'abisso/abisso.html',
+  testi: [
+    [/\s*\(rimborso\)/gi, ''], [/\s*\(refund\)/gi, ''],
+    [/\babisso a soldi[^.]*\.?/gi, ''],
+    [/[·,]?\s*premi per posizione[^<·]*/gi, ''], [/[·,]?\s*prizes by position[^<·]*/gi, ''],
+    [/\s*·?\s*5% alla casa/gi, ''], [/\s*·?\s*5% to the house/gi, ''], [/\s*\(5% alla casa\)/gi, ''], [/\s*\(5% to the house\)/gi, ''],
+    [/\bcasin[oò]\b/gi, 'tana']
+  ],
+  dopo: function (D) {
+    if (window.GXDC_FIGLIA || window.__GXABI) return;
+    window.__GXABI = {rientra_saltati: 0, nessuna: 0};
+    var W = window;
+    if (typeof W.rtdSend === 'function') {
+      var s0 = W.rtdSend;
+      W.rtdSend = function (m) {
+        try {
+          if (m && m.t === 'rientra' && W.RTD && RTD.game === 'abisso' && RTD.over && RTD.over.game === 'abisso') { W.__GXABI.rientra_saltati++; return; }
+        } catch (e) {}
+        return s0.apply(this, arguments);
+      };
+    }
+    // scheda di fine: il tasto «Tasti» dell'index (.xpc-btn) non serve e copriva «Torna ai giochi» (come SBANCA)
+    var H = document.documentElement;
+    if (typeof W.rtdShowOver === 'function') {
+      var o0 = W.rtdShowOver;
+      W.rtdShowOver = function () { try { H.classList.add('gxab-fine'); } catch (e) {} return o0.apply(this, arguments); };
+    }
+    if (typeof W.rtdShowAbissoRT === 'function') {
+      var m0 = W.rtdShowAbissoRT;
+      W.rtdShowAbissoRT = function () { try { H.classList.remove('gxab-fine'); } catch (e) {} return m0.apply(this, arguments); };
+    }
+    if (typeof W.rtdOnMsg === 'function') {
+      var r0 = W.rtdOnMsg;
+      W.rtdOnMsg = function (m) {
+        try {
+          if (m && m.t === 'err' && m.msg === 'nessuna partita da riprendere' && W.RTD && RTD.game === 'abisso' &&
+              typeof ABRT !== 'undefined' && ABRT.aperto && !ABRT.spec) {
+            W.__GXABI.nessuna++;
+            if (RTD.over && typeof W.rtdShowOver === 'function') {
+              if (typeof W.rtdChiudiAbissoRT === 'function') rtdChiudiAbissoRT(true);
+              RTD.ui = 'match';
+              rtdShowOver(RTD.over);
+            } else if (D && D.alCatalogo && !D.chiuso) { D.chiuso = true; D.alCatalogo('fine'); }
+            return;
+          }
+        } catch (e) {}
+        return r0.apply(this, arguments);
+      };
+    }
+  },
+  prima: function (D) {
+    if (!window.GXDC_FIGLIA || !/\/abisso\/abisso\.html$/.test(location.pathname)) return;
+    try {
+      var u = new URL(location.href);
+      u.searchParams.set('piatt', 'dc');
+      history.replaceState(null, '', u.pathname + u.search + u.hash);
+    } catch (e) {}
+  }
+});
+

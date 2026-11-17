@@ -35,6 +35,8 @@ window.GX_GIOCHI = [
    descr:'Due carri armati, sponde e missili. Chi colpisce per primo l\'altro tre volte vince.'},
   {id:'sbanca',  cat:'live',  nome:'SBANCA!', sotto:'Artiglieria a turni, il terreno si rompe', min:2, max:4, durata:'~6 min', bot:true,
    descr:'Il colpo grosso a turni: mira, vento e potenza. Ogni esplosione scava il terreno; chi cade in acqua è fuori. Vince l\'ultima squadra in piedi.'},
+  {id:'abisso',  cat:'live',  nome:'Non svegliare il drago', sotto:'Avanti o torni su con l\'oro?', min:2, max:8, durata:'~5 min', bot:true,
+   descr:'Nella tana del drago, a ogni carta tutti scelgono in segreto: avanti o torna su. L\'oro si divide fra chi va avanti; al secondo segno uguale il drago si sveglia e chi è sul sentiero perde tutto. Vince chi ha più oro dopo 5 spedizioni.'},
   {id:'alley',   cat:'live',  nome:'Vicoli', sotto:'Dinamite nel cantiere, una vita', min:2, max:2, durata:'~90 s', bot:true,
    descr:'Un cantiere, la dinamite e una vita sola. Chiudi l\'avversario prima che lui chiuda te.'},
   {id:'snake',   cat:'live',  nome:'Snake Arena', sotto:'Cresci e taglia la strada', min:2, max:2, durata:'~2 min', bot:true,

@@ -18,7 +18,7 @@
   // la cartella di app.html ('/' dentro Discord); figlia.html sta in giochi/app/
   var radice = FIGLIA ? location.pathname.replace(/giochi\/app\/[^\/]*$/, '') : location.pathname.replace(/[^\/]*$/, '');
   var APP = radice + 'app/';
-  var VER = '20261117l10';
+  var VER = '20261118ab';
   // le librerie che le pagine a parte prendono da un CDN (bloccato dalla CSP di Discord): copie nel repo, vendor/
   var CDN = [
     [/https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/three\.js\/r128\/three\.min\.js/g, 'vendor/three/three.min.js'],
