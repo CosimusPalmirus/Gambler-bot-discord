@@ -10,6 +10,45 @@
 (function () {
   'use strict';
   var FIGLIA = !!window.GXDC_FIGLIA;   // lotto 3: una pagina a parte (Lupus, Last Call...) dentro l'index
+  // ── FOTO_VERE_1711 (17/11): le foto dei giocatori. L'avatar Discord (cdn.discordapp.com) e la copia del backend
+  //    (62-238-17-24.sslip.io/foto/) dentro l'Activity passano SOLO dal proxy (URL mapping /avatar e /api): si riscrive
+  //    l'indirizzo di ogni immagine, per l'index e per le pagine a parte. Solo questi due indirizzi, nient'altro.
+  (function () {
+    function rif(u) {
+      if (typeof u !== 'string') return u;
+      var m = /^https:\/\/cdn\.discordapp\.com\/(avatars\/.+)$/.exec(u);
+      if (m) return '/.proxy/avatar/' + m[1];
+      m = /^https:\/\/62-238-17-24\.sslip\.io\/(foto\/\d{3,20}\.jpg.*)$/.exec(u);
+      if (m) return '/.proxy/api/' + m[1];
+      return u;
+    }
+    window.GXDC_FOTO = rif;
+    try {
+      var IP = HTMLImageElement.prototype, d = Object.getOwnPropertyDescriptor(IP, 'src');
+      if (d && d.set) Object.defineProperty(IP, 'src', {configurable: true, enumerable: d.enumerable, get: d.get,
+        set: function (v) { d.set.call(this, rif(v)); }});
+      var sa0 = Element.prototype.setAttribute;
+      Element.prototype.setAttribute = function (k, v) {
+        if (this instanceof HTMLImageElement && String(k).toLowerCase() === 'src') v = rif(String(v));
+        return sa0.call(this, k, v);
+      };
+      // le <img> scritte con innerHTML non passano dal setter: le si corregge appena entrano (microtask, prima
+      // che l'errore della CSP arrivi come evento)
+      var ritocca = function (im) { var s = im.getAttribute('src'); if (s) { var t = rif(s); if (t !== s) sa0.call(im, 'src', t); } };
+      new MutationObserver(function (lista) {
+        for (var i = 0; i < lista.length; i++) {
+          var r = lista[i];
+          if (r.type === 'attributes') { if (r.target instanceof HTMLImageElement) ritocca(r.target); continue; }
+          for (var j = 0; j < r.addedNodes.length; j++) {
+            var n = r.addedNodes[j];
+            if (n.nodeType !== 1) continue;
+            if (n.tagName === 'IMG') ritocca(n);
+            else if (n.getElementsByTagName) { var c = n.getElementsByTagName('img'); for (var k = 0; k < c.length; k++) ritocca(c[k]); }
+          }
+        }
+      }).observe(document, {subtree: true, childList: true, attributes: true, attributeFilter: ['src']});
+    } catch (e) { console.warn('[discord] foto', e); }
+  })();
   var q = new URLSearchParams(location.search);
   var P = null;
   try { if (parent && parent !== window && parent.GXD) P = parent.GXD; } catch (e) { P = null; }
