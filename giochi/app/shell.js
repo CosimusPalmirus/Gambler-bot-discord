@@ -17,7 +17,7 @@
   try { CFG = (parent && parent.GX_CONFIG) || {}; } catch (e) { CFG = {}; }
   var io = (P && P.io) || {id: 'dc:0', nome: 'Giocatore', foto: ''};
   var D = window.GXDC = {
-    gioco: q.get('gioco') || '', ticket: q.get('t') || '', pratica: q.get('p') === '1',
+    gioco: q.get('gioco') || '', ticket: q.get('t') || '', pratica: q.get('p') === '1', guarda: q.get('w') || '',
     sessione: (P && P.sessione) || '', io: io, partito: false, chiuso: false
   };
   function alCatalogo(cosa) {
@@ -278,7 +278,18 @@
     document.documentElement.classList.add('gxdc');
     try { window.focus(); } catch (e) {}
     var XE = EXTRA[D.gioco];   // lotto 4: giochi col client loro (turf/glad/tank): entra(D) e schermo
-    if (D.ticket && XE && typeof XE.entra === 'function') {
+    if (D.guarda && !D.ticket) {
+      // lotto 10: SPETTATORE di una partita di un torneo del canale. Il biglietto firmato dal backend («lid:dct...») va al
+      // ramo `watch` del server RT come il lid di una lobby aperta: la vista spettatore della mini app (RTD / Tank).
+      document.documentElement.classList.add('gx-guarda');
+      // la chat della mini app non vale dentro Discord (i verbi della chat non sono di un uid dc:) e la scheda di fine dello
+      // spettatore non ha tasti: tornare al tabellone o seguire il vincitore lo fa il catalogo (torneo.js)
+      try { var stg = document.createElement('style'); stg.textContent = 'html.gx-guarda .ut-chat{display:none!important}html.gx-guarda #arc-modal .tw-ov-btns{display:none!important}'; (document.head || document.documentElement).appendChild(stg); } catch (e) {}
+      if (D.gioco === 'tank') { window.TKD_WATCH = D.guarda; go('tank'); }
+      else if (RTD_G[D.gioco]) { window.RTD_GAME = D.gioco; window.RTD_WATCH = D.guarda; go('arc'); }
+      else { alCatalogo('errore'); return; }
+      setTimeout(function () { chiama(D.gioco, 'dopo', D); }, 0);
+    } else if (D.ticket && XE && typeof XE.entra === 'function') {
       var aperto = false;
       try { aperto = !!XE.entra(D); } catch (e) { console.warn('[discord] extra ' + D.gioco + '.entra', e); }
       if (!aperto) { alCatalogo('errore'); return; }
@@ -307,7 +318,7 @@
     // chi chiude il gioco senza «Esci» (catalogo, finestra dell'Activity chiusa) lascia la partita: senza questo il
     // server lo rimetterebbe nella stessa stanza al gioco dopo (rientro), anche se sceglie un altro gioco
     addEventListener('pagehide', function () {
-      try { if (RTD.ws && RTD.ws.readyState === 1 && (RTD.ui === 'match' || RTD.ui === 'search')) RTD.ws.send(JSON.stringify({t: RTD.practice ? 'leave' : 'abbandona'})); } catch (e) {}
+      try { if (RTD.ws && RTD.ws.readyState === 1 && (RTD.ui === 'match' || RTD.ui === 'search')) RTD.ws.send(JSON.stringify({t: (RTD.spec || RTD.specRid || D.guarda) ? 'unwatch' : (RTD.practice ? 'leave' : 'abbandona')})); } catch (e) {}
     });
     window.rtdPracAgain = function () { D.chiuso = true; alCatalogo('ancora'); };
     // dopo la partita la mini app rimette la lobby (posta, tavoli a soldi) sotto la scheda di fine: qui niente lobby,

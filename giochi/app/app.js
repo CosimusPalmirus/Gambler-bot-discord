@@ -16,7 +16,8 @@
     function fuoco() { try { fr.focus(); fr.contentWindow.focus(); } catch (e) {} }
     fr.addEventListener('load', fuoco);
     setTimeout(fuoco, 300);
-    fr.src = 'app.html?gioco=' + encodeURIComponent(o.gioco) + '&t=' + encodeURIComponent(o.ticket || '') + (o.pratica ? '&p=1' : '');
+    fr.src = 'app.html?gioco=' + encodeURIComponent(o.gioco) + '&t=' + encodeURIComponent(o.ticket || '') + (o.pratica ? '&p=1' : '') +
+      (o.guarda ? '&w=' + encodeURIComponent(o.guarda) : '');   // lotto 10: spettatore di una partita del torneo
     function suMsg(ev) {
       if (ev.origin !== location.origin || ev.source !== fr.contentWindow) return;
       var d = ev.data; if (!d || typeof d !== 'object' || !d.gx) return;

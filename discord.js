@@ -219,7 +219,7 @@
         var proto = location.protocol === 'https:' ? 'wss://' : 'ws://';
         var wsUrl = CFG.wsUrl || (proto + location.host + API + '/turfws');
         if (GIOCHI_APP.indexOf(gioco) >= 0 && window.GXApp) {
-          return window.GXApp.avvia({gioco: srv(gioco), ticket: ticket, pratica: !!opz.pratica, onFine: opz.onFine});
+          return window.GXApp.avvia({gioco: srv(gioco), ticket: ticket, pratica: !!opz.pratica, guarda: opz.guarda || '', onFine: opz.onFine});
         }
         if (gioco === 'smash' && window.GXSmash) {
           // Smash: la pagina del gioco (arena.html) in un iframe; l'allenamento coi bot gira tutto li' dentro
@@ -245,9 +245,9 @@
     if (GIOCHI_APP.indexOf(gioco) >= 0) gioco = 'app';
     if (caricati[gioco]) return caricati[gioco];
     caricati[gioco] = new Promise(function (ok, ko) {
-      var c = document.createElement('link'); c.rel = 'stylesheet'; c.href = 'giochi/' + gioco + '/' + gioco + '.css?v=1711l3';
+      var c = document.createElement('link'); c.rel = 'stylesheet'; c.href = 'giochi/' + gioco + '/' + gioco + '.css?v=1711l10';
       document.head.appendChild(c);
-      var s = document.createElement('script'); s.src = 'giochi/' + gioco + '/' + gioco + '.js?v=1711l3';
+      var s = document.createElement('script'); s.src = 'giochi/' + gioco + '/' + gioco + '.js?v=1711l10';
       s.onload = ok; s.onerror = function () { caricati[gioco] = null; ko(new Error('gioco non trovato')); };
       document.head.appendChild(s);
     });

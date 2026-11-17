@@ -414,6 +414,14 @@
     document.documentElement.classList.toggle('modo-pip', pip);
   }
   function disegnaPip() {
+    // lotto 10: un torneo del canale in corso si vede anche nella finestrella
+    var tn = window.GXTorneo && window.GXTorneo.pip && window.GXTorneo.pip();
+    if (tn && !stato.coda && !stato.sala) {
+      $('p-ico').innerHTML = tn.ico; $('p-sopra').textContent = stato.gente.length + ' nel canale';
+      $('p-nome').textContent = tn.nome; $('p-stato').textContent = tn.stato;
+      $('p-facce').innerHTML = stato.gente.slice(0, 5).map(avatar).join('') + (stato.gente.length > 5 ? '<em>+' + (stato.gente.length - 5) + '</em>' : '');
+      return;
+    }
     var g = stato.inGioco || (stato.coda && stato.coda.g) || (stato.sala && stato.sala.g) || stato.aperto || stato.ultimo, n = stato.gente.length;
     $('p-ico').innerHTML = g ? icona(g) : '<svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>';
     $('p-sopra').textContent = n + ' nel canale';
@@ -477,6 +485,7 @@
   });
   document.addEventListener('keydown', function (e) {
     if (stato.inGioco) return;
+    if (window.GXTorneo && window.GXTorneo.aperto()) return;   // lotto 10: Esc chiude il torneo, non il resto
     if (e.key === 'Escape') { if (stato.coda) chiudiCoda('Ricerca annullata'); else if (stato.sala) chiudiSala(); else if (stato.aperto) chiudi(); }
   });
   var inp = $('cerca');
@@ -487,6 +496,10 @@
   });
   $('via').addEventListener('click', function () { inp.value = ''; inp.dispatchEvent(new Event('input')); inp.focus(); });
   addEventListener('resize', controllaPip);
+
+  /* lotto 10: quello che serve ai tornei del canale (torneo.js) */
+  window.GXCat = {stato: stato, toast: toast, disegnaPip: disegnaPip, PER_ID: PER_ID};
+  window.GXD.toast = toast;
 
   /* ───────── avvio ───────── */
   disegnaCarosello();
