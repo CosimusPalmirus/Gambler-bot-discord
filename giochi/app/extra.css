@@ -409,3 +409,11 @@ html.gxdc.gx-abisso #arc-prize { display: none !important; }
 /* scheda di fine (classe messa da abisso.js su rtdShowOver): il tasto «Tasti» dell'index (.xpc-btn) copriva «Torna ai giochi» */
 html.gxdc.gx-abisso.gxab-fine .xpc-btn { display: none !important; }
 
+
+/* ── hop (17/11, hop_rilascio_1711) · hop.css ── */
+/* DISCORD (17/11) — HOP CLASH: il gioco e' una pagina a parte a tutto schermo (iframe del guscio HPRT).
+   Nell'index, durante la ricerca della stanza, la riga del premio della mini app non serve (gratis). */
+html.gxdc.gx-hop #arc-prize { display: none !important; }
+/* scheda di fine (classe messa da hop.js su rtdShowOver): il tasto «Tasti» dell'index (.xpc-btn) copriva «Torna ai giochi» */
+html.gxdc.gx-hop.gxhp-fine .xpc-btn { display: none !important; }
+

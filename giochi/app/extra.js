@@ -2515,3 +2515,77 @@ GXDC_EXTRA('abisso', {
   }
 });
 
+
+/* ── hop (17/11, hop_rilascio_1711) · hop.js ── */
+/* DISCORD (17/11, hop_rilascio_1711) — HOP CLASH («hop»). SOLO GRATIS, niente parole da casino'.
+   Il gioco vive in una pagina a parte: l'index (guscio HPRT del rilascio Telegram) apre l'iframe
+   «hop/hop.html?rt=1&modo=rt&piatt=tg&avvia=1&titolo=0&...»; shell.js lo gira su figlia.html (pagina in PAGINE_EXTRA) e
+   carica.js (lotto 9: pagine anche in una sottocartella) la scrive con lo stesso strato Discord.
+   Nella pagina a parte, PRIMA degli script del gioco: ?piatt=tg -> ?piatt=dc (la pagina del gioco non mostra mai soldi:
+   solo cuori e ninfee). Nell'index: «rientra» a partita finita non parte; «nessuna partita da riprendere» -> scheda di
+   fine (o catalogo), mai la schermata d'attesa (stessa cura di SBANCA e del drago).
+   Niente globali libere, niente eval. Copia del modello di abisso (abisso_rilascio_1711/strumenti/discord/abisso.js). */
+GXDC_EXTRA('hop', {
+  pagina: 'hop/hop.html',
+  testi: [
+    [/\s*\(rimborso\)/gi, ''], [/\s*\(refund\)/gi, ''],
+    [/\bHOP CLASH a soldi[^.]*\.?/gi, ''], [/\bHOP CLASH for money[^.]*\.?/gi, ''],
+    [/💰\s*Tutto al vincitore[^<·]*/gi, ''], [/💰\s*Winner takes all[^<·]*/gi, ''],
+    [/\s*prende il 95% del piatto/gi, ''], [/\s*takes 95% of the pot/gi, ''], [/[·,]?\s*tutto al vincitore,?\s*/gi, ' '], [/[·,]?\s*winner takes all,?\s*/gi, ' '],
+    [/💰\s*Premi per posizione[^<]*/gi, ''], [/💰\s*Prizes by position[^<]*/gi, ''],
+    [/[·,]?\s*premi per posizione[^<·]*/gi, ''], [/[·,]?\s*prizes by position[^<·]*/gi, ''],
+    [/\s*·?\s*5% alla casa/gi, ''], [/\s*·?\s*5% to the house/gi, ''], [/\s*\(5% alla casa\)/gi, ''], [/\s*\(5% to the house\)/gi, ''],
+    [/\bcasin[oò]\b/gi, 'stagno']
+  ],
+  dopo: function (D) {
+    if (window.GXDC_FIGLIA || window.__GXHOP) return;
+    window.__GXHOP = {rientra_saltati: 0, nessuna: 0};
+    var W = window;
+    if (typeof W.rtdSend === 'function') {
+      var s0 = W.rtdSend;
+      W.rtdSend = function (m) {
+        try {
+          if (m && m.t === 'rientra' && W.RTD && RTD.game === 'hop' && RTD.over && RTD.over.game === 'hop') { W.__GXHOP.rientra_saltati++; return; }
+        } catch (e) {}
+        return s0.apply(this, arguments);
+      };
+    }
+    // scheda di fine: il tasto «Tasti» dell'index (.xpc-btn) non serve e copriva «Torna ai giochi» (come SBANCA e il drago)
+    var H = document.documentElement;
+    if (typeof W.rtdShowOver === 'function') {
+      var o0 = W.rtdShowOver;
+      W.rtdShowOver = function () { try { H.classList.add('gxhp-fine'); } catch (e) {} return o0.apply(this, arguments); };
+    }
+    if (typeof W.rtdShowHopRT === 'function') {
+      var m0 = W.rtdShowHopRT;
+      W.rtdShowHopRT = function () { try { H.classList.remove('gxhp-fine'); } catch (e) {} return m0.apply(this, arguments); };
+    }
+    if (typeof W.rtdOnMsg === 'function') {
+      var r0 = W.rtdOnMsg;
+      W.rtdOnMsg = function (m) {
+        try {
+          if (m && m.t === 'err' && m.msg === 'nessuna partita da riprendere' && W.RTD && RTD.game === 'hop' &&
+              typeof HPRT !== 'undefined' && HPRT.aperto && !HPRT.spec) {
+            W.__GXHOP.nessuna++;
+            if (RTD.over && typeof W.rtdShowOver === 'function') {
+              if (typeof W.rtdChiudiHopRT === 'function') rtdChiudiHopRT(true);
+              RTD.ui = 'match';
+              rtdShowOver(RTD.over);
+            } else if (D && D.alCatalogo && !D.chiuso) { D.chiuso = true; D.alCatalogo('fine'); }
+            return;
+          }
+        } catch (e) {}
+        return r0.apply(this, arguments);
+      };
+    }
+  },
+  prima: function (D) {
+    if (!window.GXDC_FIGLIA || !/\/hop\/hop\.html$/.test(location.pathname)) return;
+    try {
+      var u = new URL(location.href);
+      u.searchParams.set('piatt', 'dc');
+      history.replaceState(null, '', u.pathname + u.search + u.hash);
+    } catch (e) {}
+  }
+});
+

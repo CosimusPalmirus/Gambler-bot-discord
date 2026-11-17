@@ -18,12 +18,14 @@
   // la cartella di app.html ('/' dentro Discord); figlia.html sta in giochi/app/
   var radice = FIGLIA ? location.pathname.replace(/giochi\/app\/[^\/]*$/, '') : location.pathname.replace(/[^\/]*$/, '');
   var APP = radice + 'app/';
-  var VER = '20261118fv';   // FOTO_VERE_1711
+  var VER = '20261118hp';   // FOTO_VERE_1711
   // le librerie che le pagine a parte prendono da un CDN (bloccato dalla CSP di Discord): copie nel repo, vendor/
   var CDN = [
     [/https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/three\.js\/r128\/three\.min\.js/g, 'vendor/three/three.min.js'],
     [/https:\/\/cdn\.jsdelivr\.net\/npm\/three@0\.128\.0\/examples\/js\/loaders\/GLTFLoader\.js/g, 'vendor/three/GLTFLoader.js'],
     [/https:\/\/cdn\.jsdelivr\.net\/npm\/three@0\.128\.0\/examples\/js\/utils\/SkeletonUtils\.js/g, 'vendor/three/SkeletonUtils.js'],
+    // HOP CLASH (17/11): il decodificatore meshopt che la pagina chiede al CDN (copia in vendor/three)
+    [/https:\/\/cdn\.jsdelivr\.net\/npm\/three@0\.128\.0\/examples\/js\/libs\/meshopt_decoder\.js/g, 'vendor/three/meshopt_decoder.js'],
     // Geo (17/11): Leaflet serve solo se Google non parte (mappa di riserva); senza copia la CSP lo blocca
     [/https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/leaflet\/1\.9\.4\/leaflet\.min\.js/g, 'vendor/leaflet/leaflet.min.js'],
     [/https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/leaflet\/1\.9\.4\/leaflet\.min\.css/g, 'vendor/leaflet/leaflet.min.css']
