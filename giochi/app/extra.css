@@ -197,3 +197,11 @@ html.gxdc.gx-pong.xpc-pc #pg-ctrl{display:none!important}
   html.gxdc.gx-pong #arc-cv{max-height:calc(100vh - 14px)!important}
 }
 
+
+
+/* ── geo · geo.css ── */
+/* DISCORD · Geo — i cursori «mano» di Google Maps sono immagini su maps.gstatic.com messe in linea (style="cursor:url(...)"):
+   la CSP di Discord le bloccherebbe (errore in console, cursore di riserva). Con !important vince il cursore del sistema
+   e l'immagine non si chiede nemmeno. */
+html.gxdc.gx-geo [style*="mapfiles/openhand"]{cursor:grab!important}
+html.gxdc.gx-geo [style*="mapfiles/closedhand"]{cursor:grabbing!important}

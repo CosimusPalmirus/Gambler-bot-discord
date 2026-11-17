@@ -1234,3 +1234,165 @@ GXDC_EXTRA('pong', {
   }
 });
 
+
+
+/* ── geo · geo.js ── */
+/* DISCORD · Geo (17/11/2026) — Street View VERO dentro l'Activity, gratis.
+   La pagina del gioco e' geo.html della mini app (guscio GEORT dell'index -> figlia.html?pg=geo.html?...), invariata.
+   Il problema: la CSP di discordsays.com ammette solo la propria origine. Google Maps JS chiede script (caricatore,
+   main.js, JSONP AuthenticationService/QuotaService), XHR/fetch ($rpc GetMetadata/SingleImageSearch/GetViewportInfo),
+   immagini (riquadri della mappa /maps/vt, riquadri del panorama streetviewpixels-pa, cursori, lh3 per le foto-sfere).
+   Qui OGNI indirizzo assoluto di quegli host diventa la stessa origine + una URL mapping nuova del portale Discord:
+       maps.googleapis.com                 -> /gmaps
+       maps.gstatic.com                    -> /gstatic
+       streetviewpixels-pa.googleapis.com  -> /gsvpx
+       lh3..lh6.googleusercontent.com      -> /glh      (tutti su lh3: stessi contenuti)
+   I punti dove passano gli indirizzi: src di <script>/<img> (proprieta' e setAttribute), fetch, XMLHttpRequest,
+   sendBeacon, Worker, url(...) negli stili in linea (cursori). I font di Google (fonts.googleapis.com) NON si caricano
+   (il loro CSS punta a fonts.gstatic.com, che la CSP blocca comunque): un foglio vuoto, si usano i font di sistema.
+   Il resto e' come gli altri giochi a pagina a parte (lotto 3): biglietto Discord gratis, seggi ai bot del motore,
+   testi senza soldi. Gira SOLO nella pagina geo.html (window.GXDC_FIGLIA); nell'index non tocca niente. */
+(function () {
+  'use strict';
+  var PAGINA = 'geo.html';
+  var MAPPA = {
+    'maps.googleapis.com': 'gmaps',
+    'maps.gstatic.com': 'gstatic',
+    'streetviewpixels-pa.googleapis.com': 'gsvpx'
+  };
+  function prefisso(h) {
+    h = String(h || '').toLowerCase();
+    if (MAPPA[h]) return MAPPA[h];
+    if (/^lh[3-6]\.googleusercontent\.com$/.test(h)) return 'glh';
+    return null;
+  }
+  var CSS_VUOTO = null;
+  function cssVuoto() {
+    if (!CSS_VUOTO) CSS_VUOTO = URL.createObjectURL(new Blob(['/* gxdc: font di Google non caricati */'], {type: 'text/css'}));
+    return CSS_VUOTO;
+  }
+  var CONTI = {riscritti: 0, font: 0};
+  // un indirizzo -> quello della mapping (stessa origine). Tutto il resto torna tale e quale (anche gli oggetti Trusted Types)
+  function rw(u) {
+    if (u == null) return u;
+    var s = String(u);
+    var m = /^(?:https?:)?\/\/([A-Za-z0-9.-]+)(?::\d+)?([\/?#][\s\S]*)?$/.exec(s);
+    if (!m) return u;
+    var p = prefisso(m[1]);
+    if (!p) return u;
+    var resto = m[2] || '/';
+    if (resto.charAt(0) !== '/') resto = '/' + resto;
+    CONTI.riscritti++;
+    return location.origin + '/' + p + resto;
+  }
+  function font(u) { return /^(?:https?:)?\/\/fonts\.(googleapis|gstatic)\.com\//i.test(String(u == null ? '' : u)); }
+  // url(...) dentro un valore di stile (i cursori «openhand» di Maps)
+  function rwCss(v) {
+    if (typeof v !== 'string' || v.indexOf('url(') < 0) return v;
+    return v.replace(/url\((['"]?)((?:https?:)?\/\/[^'")]+)\1\)/g, function (t, q, u) { var r = rw(u); return r === u ? t : 'url(' + q + r + q + ')'; });
+  }
+
+  function installa(w) {
+    if (w.__gxGeoRete) return;
+    w.__gxGeoRete = CONTI;
+    var E = w.Element.prototype;
+    // 1) le proprieta' src/href
+    function avvolgi(Proto, prop, fn) {
+      var d = Object.getOwnPropertyDescriptor(Proto, prop);
+      if (!d || !d.set) return;
+      Object.defineProperty(Proto, prop, {configurable: true, enumerable: d.enumerable, get: d.get,
+        set: function (v) { return d.set.call(this, fn(v, this)); }});
+    }
+    avvolgi(w.HTMLScriptElement.prototype, 'src', function (v) { return rw(v); });
+    avvolgi(w.HTMLImageElement.prototype, 'src', function (v) { return rw(v); });
+    avvolgi(w.HTMLSourceElement.prototype, 'src', function (v) { return rw(v); });
+    avvolgi(w.HTMLLinkElement.prototype, 'href', function (v) { if (font(v)) { CONTI.font++; return cssVuoto(); } return rw(v); });
+    // 2) setAttribute (qualche libreria passa da li')
+    var sA = E.setAttribute;
+    E.setAttribute = function (n, v) {
+      var k = String(n).toLowerCase();
+      if ((k === 'src' || k === 'href') && (this instanceof w.HTMLScriptElement || this instanceof w.HTMLImageElement ||
+          this instanceof w.HTMLLinkElement || this instanceof w.HTMLSourceElement)) {
+        if (k === 'href' && font(v)) { CONTI.font++; v = cssVuoto(); } else v = rw(v);
+      } else if (k === 'style') v = rwCss(String(v));
+      return sA.call(this, n, v);
+    };
+    // 3) fetch / XHR / sendBeacon / Worker
+    var f0 = w.fetch;
+    if (f0) w.fetch = function (input, init) {
+      try {
+        if (typeof input === 'string' || input instanceof w.URL) { var r = rw(String(input)); if (r !== String(input)) input = r; }
+        else if (input && input.url) { var r2 = rw(input.url); if (r2 !== input.url) input = new w.Request(r2, input); }
+      } catch (e) {}
+      return f0.call(this, input, init);
+    };
+    var o0 = w.XMLHttpRequest.prototype.open;
+    w.XMLHttpRequest.prototype.open = function (m, u) {
+      var a = Array.prototype.slice.call(arguments);
+      a[1] = rw(u);
+      return o0.apply(this, a);
+    };
+    if (w.navigator && w.navigator.sendBeacon) {
+      var b0 = w.navigator.sendBeacon.bind(w.navigator);
+      w.navigator.sendBeacon = function (u, d) { return b0(rw(u), d); };
+    }
+    if (w.Worker) {
+      var W0 = w.Worker;
+      w.Worker = function (u, o) { return new W0(rw(u), o); };
+      w.Worker.prototype = W0.prototype;
+    }
+    // 4) gli stili in linea con url(https://maps.gstatic.com/...) (cursori): proprieta' e setProperty/cssText
+    //    (Chrome recente: le proprieta' CSS stanno su CSSStyleProperties.prototype, cssText su CSSStyleDeclaration:
+    //     si cerca il prototipo giusto risalendo la catena di uno style vero)
+    var CS = w.CSSStyleDeclaration.prototype;
+    var st = w.document.createElement('div').style;
+    ['cursor', 'backgroundImage', 'background', 'cssText'].forEach(function (p) {
+      for (var o = Object.getPrototypeOf(st); o; o = Object.getPrototypeOf(o)) {
+        if (Object.getOwnPropertyDescriptor(o, p)) { avvolgi(o, p, rwCss); break; }
+      }
+    });
+    var sp0 = CS.setProperty;
+    CS.setProperty = function (n, v, pr) { return sp0.call(this, n, rwCss(v), pr); };
+    // 5) rete di sicurezza: ogni attributo style che cambia (Maps mette i cursori anche per altre vie) si riscrive prima
+    //    del ricalcolo degli stili (l'observer gira in microtask, il cursore si carica solo al disegno)
+    var RE_H = /url\((['"]?)(?:https?:)?\/\/(maps\.googleapis\.com|maps\.gstatic\.com|streetviewpixels-pa\.googleapis\.com|lh[3-6]\.googleusercontent\.com)\//;
+    new w.MutationObserver(function (rec) {
+      for (var i = 0; i < rec.length; i++) {
+        var el = rec[i].target, v = el.getAttribute && el.getAttribute('style');
+        if (v && RE_H.test(v)) sA.call(el, 'style', rwCss(v));
+      }
+    }).observe(w.document, {subtree: true, attributes: true, attributeFilter: ['style']});
+  }
+
+  if (typeof window.GXDC_EXTRA !== 'function') {
+    // fuori dallo strato Discord (solo la pagina di prova del banco, geo/sonda): la stessa rete a mano
+    window.GXDC_GEO_RETE = function (w) { installa(w || window); return CONTI; };
+    return;
+  }
+  GXDC_EXTRA('geo', {
+    pagina: null,            // geo.html e' gia' nella lista FIGLIE di shell.js
+    testi: [
+      [/\bGEO\s*BET\b/g, 'GEO'], [/\bGeo\s*Bet\b/g, 'Geo'], [/\bgeo\s*bet\b/gi, 'Geo'],
+      [/\bchi vince prende tutto\b/gi, 'vince chi fa più punti'], [/\bwinner takes all\b/gi, 'most points wins'],
+      [/\bposta\b/gi, 'partita'], [/\bstake\b/gi, 'game'], [/\bpot\b/gi, 'game']
+    ],
+    prima: function (D) {
+      if (!window.GXDC_FIGLIA) return;           // nell'index niente: la rete serve solo nella pagina del gioco
+      document.documentElement.classList.add('gxdc');
+      installa(window);
+    },
+    dopo: function (D) {
+      if (window.GXDC_FIGLIA) return;
+      // la scheda di fine di geo.html ha ESCI e RIGIOCA (messaggi {geo:'esci'|'rigioca'} al guscio GEORT dell'index).
+      // Nella mini app ESCI torna alla scelta con rtdAgain() (che dentro Discord vuol dire «ancora»: si riapriva un
+      // allenamento) e RIGIOCA rifa' l'allenamento con practiceStart (rotta Telegram). Qui: ESCI = catalogo,
+      // RIGIOCA = il catalogo riapre la stessa sala / coda / allenamento (come «Rivincita» negli altri giochi).
+      function via(cosa) {               // (il catalogo toglie l'iframe: niente da chiudere qui)
+        clearTimeout(D.tAncora);
+        if (!D.chiuso) { D.chiuso = true; D.alCatalogo(cosa); }
+      }
+      window.geortFineEsci = function () { via('fine'); };
+      window.geortRigioca = function () { via('ancora'); };
+    }
+  });
+})();

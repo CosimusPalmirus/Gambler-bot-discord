@@ -64,7 +64,7 @@ window.GX_GIOCHI = [
    descr:'Di notte il lupo sbrana, di giorno il villaggio processa. Bugie, accuse e voti: perfetto col vocale aperto.'},
   {id:'lastcall',cat:'party', nome:'Last Call', sotto:'Peschi finché non ti becca il buttafuori', min:2, max:7, durata:'~5 min', bot:true, ban:true /* banner nuovo, adatto a Discord (16/11) */,
    descr:'Peschi finché non ti becca il buttafuori; la mazzetta lo ferma. Chi resta in piedi vince.'},
-  {id:'geo',     cat:'party', nome:'Geo', sotto:'Indovina dove sei', min:2, max:8, durata:'~5 min', bot:false, ban:true /* banner nuovo, adatto a Discord (16/11) */,
+  {id:'geo',     cat:'party', nome:'Geo', sotto:'Indovina dove sei', min:2, max:8, durata:'~5 min', bot:true, ban:true /* banner nuovo, adatto a Discord (16/11) */,
    descr:'Una foto da un posto del mondo: indovina dove sei. Il più vicino fa più punti.'},
   {id:'deadmoney',cat:'party',nome:'Dead Quiz', sotto:'Il quiz dove chi sbaglia muore', min:3, max:8, durata:'~15 min', bot:true, ban:true /* banner nuovo, adatto a Discord (16/11) */,
    descr:'Un quiz in un hotel maledetto: chi sbaglia muore, i fantasmi continuano a giocare. Chi scappa vince.'},
