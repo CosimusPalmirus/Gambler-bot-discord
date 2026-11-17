@@ -6,7 +6,7 @@ window.GX_CONFIG = {
   clientId: '1571636314166534255',
   apiBase: '/api',
   avatarPrefix: '/avatar',
-  giochiAttivi: ['pong', 'smash', 'sumo', 'snake', 'basket', 'archery', 'draw'],
+  giochiAttivi: ['pong', 'smash', 'sumo', 'snake', 'basket', 'archery', 'draw', 'uno', 'cucu', 'uomonero', 'scopa', 'burraco', 'lupus', 'lastcall', 'kaiju', 'deadmoney', 'pool8', 'golf', 'shove', 'dama', 'backg', 'settemezzo', 'tappo', 'briscola', 'bj1v1', 'pk1v1', 'chess', 'bs', 'boxe', 'turf', 'race', 'glad', 'calcio', 'scalata', 'tank', 'alley'],
   // fase 2: questi si aprono dalla mini app online (app.html + URL mapping /app)
-  giochiApp: ['sumo', 'snake', 'basket', 'archery', 'draw']
+  giochiApp: ['sumo', 'snake', 'basket', 'archery', 'draw', 'uno', 'cucu', 'uomonero', 'scopa', 'burraco', 'lupus', 'lastcall', 'kaiju', 'deadmoney', 'pool8', 'golf', 'shove', 'dama', 'backg', 'settemezzo', 'tappo', 'briscola', 'bj1v1', 'pk1v1', 'chess', 'bs', 'boxe', 'pong', 'turf', 'race', 'glad', 'calcio', 'scalata', 'tank', 'alley']
 };

@@ -1,0 +1,199 @@
+/* DISCORD: CSS dei lotti 4,5,6,7,pong_fix */
+/* ── lotto 4 · alley.css ── */
+/* DISCORD lotto 4 · alley */
+/* finestrella di Discord (~400x225): solo il campo, niente levette/tasti a tocco ne' barretta */
+@media (max-height:300px){
+  html.gxdc.gx-alley #oz-rail,html.gxdc.gx-alley .arc-ov-right,html.gxdc.gx-alley .gld-actions,html.gxdc.gx-alley .gld-btn,
+  html.gxdc.gx-alley .twr-joy,html.gxdc.gx-alley #twr-weap,html.gxdc.gx-alley #gx-esci,html.gxdc.gx-alley #eb-esci,
+  html.gxdc.gx-alley .xpc-guida,html.gxdc.gx-alley .xpc-btn{display:none!important}
+}
+@media (max-height:300px){
+  html.gxdc.gx-alley #arc-cv{height:calc(100vh - 34px)!important;width:auto!important;max-height:none!important;max-width:100%!important}
+}
+
+
+/* ── lotto 4 · calcio.css ── */
+/* DISCORD lotto 4 · calcio — PC/orizzontale: la barretta OZ (← e ⟲ «gira il telefono») non serve dentro Discord (c'e' Esci e la
+   finestra non si gira); Esci in basso a sinistra, cosi' non copre i contatori in alto a sinistra. */
+html.gxdc.gx-calcio #oz-rail,html.gxdc.gx-calcio .oz-hdr-rot{display:none!important}
+html.gxdc.gx-calcio.oz-l #gx-esci,html.gxdc.gx-calcio.oz-l #eb-esci{top:auto!important;bottom:calc(10px + var(--oz-b,0px))!important;left:10px!important}
+/* finestrella di Discord (~400x225): solo il campo, niente levette/tasti a tocco ne' barretta */
+@media (max-height:300px){
+  html.gxdc.gx-calcio #oz-rail,html.gxdc.gx-calcio .arc-ov-right,html.gxdc.gx-calcio .gld-actions,html.gxdc.gx-calcio .gld-btn,
+  html.gxdc.gx-calcio .twr-joy,html.gxdc.gx-calcio #twr-weap,html.gxdc.gx-calcio #gx-esci,html.gxdc.gx-calcio #eb-esci,
+  html.gxdc.gx-calcio .xpc-guida,html.gxdc.gx-calcio .xpc-btn{display:none!important}
+}
+/* il campo del Derby in orizzontale e' la tela verticale GIRATA dal CSS: in finestrella il suo lato «largo» (prima del giro)
+   e' l'altezza a schermo. Niente tetto generico di shell.css */
+@media (max-height:300px){
+  html.gxdc.gx-calcio #arc-cv{width:calc(100vh - 2px)!important;height:auto!important;max-height:none!important;max-width:none!important}
+}
+
+
+/* ── lotto 4 · glad.css ── */
+/* DISCORD lotto 4 · glad — PC/orizzontale: la barretta OZ (← e ⟲ «gira il telefono») non serve dentro Discord (c'e' Esci e la
+   finestra non si gira); Esci in basso a sinistra, cosi' non copre i contatori in alto a sinistra. */
+html.gxdc.gx-glad #oz-rail,html.gxdc.gx-glad .oz-hdr-rot{display:none!important}
+html.gxdc.gx-glad.oz-l #gx-esci,html.gxdc.gx-glad.oz-l #eb-esci{top:auto!important;bottom:calc(10px + var(--oz-b,0px))!important;left:10px!important}
+/* finestrella di Discord (~400x225): solo il campo, niente levette/tasti a tocco ne' barretta */
+@media (max-height:300px){
+  html.gxdc.gx-glad #oz-rail,html.gxdc.gx-glad .arc-ov-right,html.gxdc.gx-glad .gld-actions,html.gxdc.gx-glad .gld-btn,
+  html.gxdc.gx-glad .twr-joy,html.gxdc.gx-glad #twr-weap,html.gxdc.gx-glad #gx-esci,html.gxdc.gx-glad #eb-esci,
+  html.gxdc.gx-glad .xpc-guida,html.gxdc.gx-glad .xpc-btn{display:none!important}
+}
+
+
+/* ── lotto 4 · race.css ── */
+/* DISCORD lotto 4 · race — PC/orizzontale: la barretta OZ (← e ⟲ «gira il telefono») non serve dentro Discord (c'e' Esci e la
+   finestra non si gira); Esci in basso a sinistra, cosi' non copre i contatori in alto a sinistra. */
+html.gxdc.gx-race #oz-rail,html.gxdc.gx-race .oz-hdr-rot{display:none!important}
+html.gxdc.gx-race.oz-l #gx-esci,html.gxdc.gx-race.oz-l #eb-esci{top:auto!important;bottom:calc(10px + var(--oz-b,0px))!important;left:10px!important}
+/* finestrella di Discord (~400x225): solo il campo, niente levette/tasti a tocco ne' barretta */
+@media (max-height:300px){
+  html.gxdc.gx-race #oz-rail,html.gxdc.gx-race .arc-ov-right,html.gxdc.gx-race .gld-actions,html.gxdc.gx-race .gld-btn,
+  html.gxdc.gx-race .twr-joy,html.gxdc.gx-race #twr-weap,html.gxdc.gx-race #gx-esci,html.gxdc.gx-race #eb-esci,
+  html.gxdc.gx-race .xpc-guida,html.gxdc.gx-race .xpc-btn{display:none!important}
+}
+/* la tela della pista in finestrella: quella che la pagina ha misurato (alta quanto la finestra), non il tetto generico
+   di shell.css (100vh-100px, pensato per le tele con l'intestazione sopra) */
+@media (max-height:300px){
+  html.gxdc.gx-race #arc-cv{height:calc(100vh - 2px)!important;width:auto!important;max-height:none!important;max-width:100%!important}
+  html.gxdc.gx-race #arc-hud{transform:scale(.6)!important;transform-origin:100% 0!important}
+}
+
+
+/* ── lotto 4 · scalata.css ── */
+/* DISCORD lotto 4 · scalata */
+/* finestrella di Discord (~400x225): solo il campo, niente levette/tasti a tocco ne' barretta */
+@media (max-height:300px){
+  html.gxdc.gx-scalata #oz-rail,html.gxdc.gx-scalata .arc-ov-right,html.gxdc.gx-scalata .gld-actions,html.gxdc.gx-scalata .gld-btn,
+  html.gxdc.gx-scalata .twr-joy,html.gxdc.gx-scalata #twr-weap,html.gxdc.gx-scalata #gx-esci,html.gxdc.gx-scalata #eb-esci,
+  html.gxdc.gx-scalata .xpc-guida,html.gxdc.gx-scalata .xpc-btn{display:none!important}
+}
+
+
+/* ── lotto 4 · tank.css ── */
+/* DISCORD lotto 4 · tank — PC/orizzontale: la barretta OZ (← e ⟲ «gira il telefono») non serve dentro Discord (c'e' Esci e la
+   finestra non si gira); Esci in basso a sinistra, cosi' non copre i contatori in alto a sinistra. */
+html.gxdc.gx-tank #oz-rail,html.gxdc.gx-tank .oz-hdr-rot{display:none!important}
+html.gxdc.gx-tank.oz-l #gx-esci,html.gxdc.gx-tank.oz-l #eb-esci{top:auto!important;bottom:calc(10px + var(--oz-b,0px))!important;left:10px!important}
+/* finestrella di Discord (~400x225): solo il campo, niente levette/tasti a tocco ne' barretta */
+@media (max-height:300px){
+  html.gxdc.gx-tank #oz-rail,html.gxdc.gx-tank .arc-ov-right,html.gxdc.gx-tank .gld-actions,html.gxdc.gx-tank .gld-btn,
+  html.gxdc.gx-tank .twr-joy,html.gxdc.gx-tank #twr-weap,html.gxdc.gx-tank #gx-esci,html.gxdc.gx-tank #eb-esci,
+  html.gxdc.gx-tank .xpc-guida,html.gxdc.gx-tank .xpc-btn{display:none!important}
+}
+
+
+/* ── lotto 4 · turf.css ── */
+/* DISCORD lotto 4 · turf — PC/orizzontale: la barretta OZ (← e ⟲ «gira il telefono») non serve dentro Discord (c'e' Esci e la
+   finestra non si gira); Esci in basso a sinistra, cosi' non copre i contatori in alto a sinistra. */
+html.gxdc.gx-turf #oz-rail,html.gxdc.gx-turf .oz-hdr-rot{display:none!important}
+html.gxdc.gx-turf.oz-l #gx-esci,html.gxdc.gx-turf.oz-l #eb-esci{top:auto!important;bottom:calc(10px + var(--oz-b,0px))!important;left:10px!important}
+/* finestrella di Discord (~400x225): solo il campo, niente levette/tasti a tocco ne' barretta */
+@media (max-height:300px){
+  html.gxdc.gx-turf #oz-rail,html.gxdc.gx-turf .arc-ov-right,html.gxdc.gx-turf .gld-actions,html.gxdc.gx-turf .gld-btn,
+  html.gxdc.gx-turf .twr-joy,html.gxdc.gx-turf #twr-weap,html.gxdc.gx-turf #gx-esci,html.gxdc.gx-turf #eb-esci,
+  html.gxdc.gx-turf .xpc-guida,html.gxdc.gx-turf .xpc-btn{display:none!important}
+}
+
+
+/* ── lotto 6 · bj1v1.css ── */
+/* DISCORD lotto 6 — bj1v1: la pillola «Tasti» dell'index stava sopra i tasti del gioco (centro in basso): in basso a sinistra */
+html.gxdc.gx-bj1v1 .xpc-btn{left:12px!important;translate:none!important;bottom:12px!important;top:auto!important}
+/* la ✕ della pagina (esci) stava sotto l'«Esci» di Discord: resta solo quella di Discord (stesso effetto) */
+html.gxdc.gx-bj1v1 #b-esci{visibility:hidden!important}
+
+
+/* ── lotto 6 · briscola.css ── */
+/* DISCORD lotto 6 — Briscola: «Tasti» a sinistra a meta' altezza (al centro in basso copriva la mano, in basso a sinistra c'e' il punteggio) */
+html.gxdc.gx-briscola .xpc-btn{left:12px!important;translate:none!important;bottom:auto!important;top:50%!important}
+/* panno blu notte al posto del verde da bisca */
+html.gxdc.gx-briscola body{background:#080c1c}
+html.gxdc.gx-briscola #app{background:radial-gradient(120% 90% at 50% 45%,#2a3f75 0%,#1b2a52 38%,#0f1733 72%,#080c1c 100%)!important}
+
+
+/* ── lotto 6 · pk1v1.css ── */
+/* DISCORD lotto 6 — pk1v1: la pillola «Tasti» dell'index stava sopra i tasti del gioco (centro in basso): in basso a sinistra */
+html.gxdc.gx-pk1v1 .xpc-btn{left:12px!important;translate:none!important;bottom:12px!important;top:auto!important}
+/* la ✕ della pagina (esci) stava sotto l'«Esci» di Discord: resta solo quella di Discord (stesso effetto) */
+html.gxdc.gx-pk1v1 #b-esci{visibility:hidden!important}
+
+
+/* ── lotto 6 · settemezzo.css ── */
+/* DISCORD lotto 6 — Sette e mezzo: il panno verde da bisca diventa un tavolo blu notte (solo dentro Discord) */
+html.gxdc.gx-settemezzo{--panno:#1b2a52;--panno2:#0f1733;--orlo:#2d4378;--buio:#080c1c;--fioco:#a9b6d6}
+
+
+/* ── lotto 6 · tappo.css ── */
+/* DISCORD lotto 6 — Mano sul mazzo: «Tasti» in basso a sinistra (al centro copriva le carte); panno blu notte */
+html.gxdc.gx-tappo .xpc-btn{left:12px!important;translate:none!important;bottom:12px!important;top:auto!important}
+html.gxdc.gx-tappo body{background:#080c1c}
+html.gxdc.gx-tappo #app,html.gxdc.gx-tappo #velo{background:radial-gradient(120% 85% at 50% 36%,#2a3f75 0%,#1b2a52 44%,#0f1733 78%,#080c1c 100%)!important}
+
+
+/* ── lotto 7 · bs.css ── */
+/* DISCORD lotto 7 — Battaglia navale. Dentro Discord si vede solo il tavolo (l'Arena dei duelli dietro, con poste e commissioni, no) */
+html.gxdc.gx-bs #duel .game-hdr,html.gxdc.gx-bs #duel .game-content>:not(#pvp-overlay){display:none!important}
+html.gxdc.gx-bs #pvp-modal .xz-hd-s i,html.gxdc.gx-bs #pvp-modal .xz-hd-s b{display:none!important}
+/* scheda di fine del restyle: la pillola «A soldi» (le partite Discord sono tutte gratis) */
+html.gxdc.gx-bs .gbf-modo.m-soldi{display:none!important}
+@media (min-width:900px) and (min-height:900px){html.gxdc.gx-bs #pvp-modal{zoom:1.2}}
+@media (min-width:1300px) and (min-height:1020px){html.gxdc.gx-bs #pvp-modal{zoom:1.35}}
+@media (max-height:300px){
+  html.gxdc.gx-bs #pvp-modal .xz-hd,html.gxdc.gx-bs #pvp-modal .dl-esci,html.gxdc.gx-bs #pvp-modal .dlbs-pot,html.gxdc.gx-bs #pvp-modal .pvp-m-title{display:none!important}
+  html.gxdc.gx-bs #pvp-modal{zoom:.4}
+}
+/* PC orizzontale: le due griglie una ACCANTO all'altra (acque nemiche a sinistra, la tua flotta a destra), non una sotto l'altra */
+@media (min-width:380px) and (min-aspect-ratio:4/3){
+  html.gxdc.gx-bs #duel #pvp-overlay #pvp-modal:has(#dlbs-own){max-width:none!important;width:min(94vw,960px)!important}
+  html.gxdc.gx-bs #dlbs-wrap:has(#dlbs-own){display:grid!important;grid-template-columns:1fr 1fr;grid-template-areas:"le lo" "fe fo" "mi mi";column-gap:36px;align-items:start}
+  html.gxdc.gx-bs #dlbs-wrap:has(#dlbs-own)>*{grid-column:1/-1}
+  html.gxdc.gx-bs #dlbs-wrap .dlbs-side-lbl:has(+#dlbs-fire){grid-area:le}
+  html.gxdc.gx-bs #dlbs-wrap #dlbs-fire{grid-area:fe;margin-left:auto!important;margin-right:auto!important}
+  html.gxdc.gx-bs #dlbs-wrap .dlbs-side-lbl:has(+#dlbs-own){grid-area:lo}
+  html.gxdc.gx-bs #dlbs-wrap #dlbs-own{grid-area:fo;margin-left:auto!important;margin-right:auto!important}
+  html.gxdc.gx-bs #dlbs-wrap .dlbs-mid{grid-area:mi}
+  /* griglie grandi quanto l'altezza permette (le caselle seguono: sono 1fr) */
+  html.gxdc.gx-bs #dlbs-wrap #dlbs-fire,html.gxdc.gx-bs #dlbs-wrap #dlbs-own{width:min(100%,calc(100vh - 250px),560px)!important;max-width:none!important;height:auto!important;aspect-ratio:1/1}
+}
+/* finestrella: anche li' le due griglie affiancate, alte quanto la finestrella (niente zoom in battaglia) */
+@media (max-height:300px) and (min-aspect-ratio:4/3){
+  html.gxdc.gx-bs #duel #pvp-overlay #pvp-modal:has(#dlbs-own){zoom:1;padding:2px!important}
+  html.gxdc.gx-bs #dlbs-wrap #dlbs-fire,html.gxdc.gx-bs #dlbs-wrap #dlbs-own{width:calc(100vh - 62px)!important;padding:2px!important;gap:1px!important}
+  html.gxdc.gx-bs #dlbs-wrap:has(#dlbs-own){column-gap:12px}
+  html.gxdc.gx-bs #pvp-modal .dlbs-side-lbl{font-size:10px!important;margin:0!important}
+  html.gxdc.gx-bs #pvp-modal .dlbs-mid{font-size:11px!important;margin:2px 0 0!important}
+}
+
+
+/* ── lotto 7 · chess.css ── */
+/* DISCORD lotto 7 — Scacchi. Dentro Discord si vede solo il tavolo (l'Arena dei duelli dietro, con poste e commissioni, no) */
+html.gxdc.gx-chess #duel .game-hdr,html.gxdc.gx-chess #duel .game-content>:not(#pvp-overlay){display:none!important}
+html.gxdc.gx-chess #pvp-modal .xz-hd-s i,html.gxdc.gx-chess #pvp-modal .xz-hd-s b{display:none!important}
+/* scheda di fine del restyle: la pillola «A soldi» (le partite Discord sono tutte gratis) */
+html.gxdc.gx-chess .gbf-modo.m-soldi{display:none!important}
+/* PC: la colonna del tavolo (scacchiera 348 px) si ingrandisce con l'altezza della finestra */
+@media (min-width:900px) and (min-height:780px){html.gxdc.gx-chess #pvp-modal{zoom:1.22}}
+@media (min-width:1100px) and (min-height:900px){html.gxdc.gx-chess #pvp-modal{zoom:1.42}}
+@media (min-width:1300px) and (min-height:1020px){html.gxdc.gx-chess #pvp-modal{zoom:1.6}}
+/* finestrella (PIP ~400x225): scacchiera e orologi, nient'altro */
+@media (max-height:300px){
+  html.gxdc.gx-chess #pvp-modal .xz-hd,html.gxdc.gx-chess #pvp-modal .dl-esci,html.gxdc.gx-chess #pvp-modal .ch-regole,
+  html.gxdc.gx-chess #pvp-modal .dlbs-pot,html.gxdc.gx-chess #pvp-modal .pvp-m-title,html.gxdc.gx-chess #ch-vista-chip{display:none!important}
+  html.gxdc.gx-chess #pvp-modal{zoom:.44}
+}
+
+
+/* ── lotto pong_fix · pong.css ── */
+/* DISCORD · Neon Pong (pong_fix): su PC (mouse o tastiera usati per ultimi) la barra da trascinare non serve piu' —
+   il mouse sopra il campo muove la racchetta — e il campo prende la sua altezza. Col tocco (xpc-pc tolta) torna. */
+html.gxdc.gx-pong.xpc-pc #pg-ctrl{display:none!important}
+/* finestrella (PIP ~400x225): il punteggio e' gia' DENTRO la tela del Pong, quindi via le pillole (TU/VS/Pixel/PRATICA)
+   e il campo prende quasi tutta l'altezza (la regola generale di shell.css lascia 100 px all'intestazione: campo 83x125) */
+@media (max-height:300px){
+  html.gxdc.gx-pong #arc-hud{display:none!important}
+  html.gxdc.gx-pong #arc-body{padding:4px!important;gap:0!important}
+  html.gxdc.gx-pong #arc-cv{max-height:calc(100vh - 14px)!important}
+}
+

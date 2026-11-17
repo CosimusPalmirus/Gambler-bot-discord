@@ -11,7 +11,9 @@ html.gxdc [onclick*="rtdPracToReal"],html.gxdc [onclick*="PracToReal"]{display:n
   html.gxdc #arc-body{top:0!important;padding-top:2px!important}
   html.gxdc #arc-hud{transform:scale(.8);transform-origin:50% 0;margin-bottom:-6px}
   /* le tele quadrate (Sumo) o alte nascevano piu' alte della finestrella: stanno nell'altezza, in proporzione */
-  html.gxdc #arc-cv{max-height:calc(100vh - 60px)!important;width:auto!important;height:auto!important;max-width:100%!important}
+  html.gxdc #arc-cv{max-height:calc(100vh - 100px)!important;width:auto!important;height:auto!important;max-width:100%!important}
 }
 /* scheda di fine: niente riga dei soldi (in Discord e' sempre gratis); pillole rimaste vuote dopo la pulizia dei testi */
 html.gxdc .gbf-soldi,html.gxdc .gbf-stato:empty,html.gxdc .gbf-pill:empty,html.gxdc .gbf-chip:empty{display:none!important}
+/* lotto 7: la scelta della modalita a soldi nella scheda di fine non esiste in Discord */
+html.gxdc .gbf-modo.m-soldi{display:none!important}

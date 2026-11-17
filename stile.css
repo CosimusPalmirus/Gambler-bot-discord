@@ -286,3 +286,8 @@ html.modo-pip .pip{display:flex;position:fixed;inset:0;align-items:center;gap:14
 @media (pointer:fine){.carosello,.filtri,.facce{cursor:grab}.carosello img{-webkit-user-drag:none;user-select:none}}
 .trascino{cursor:grabbing!important;scroll-snap-type:none!important;scroll-behavior:auto!important;user-select:none}
 .trascino *{pointer-events:none}
+/* lotto 2: la variante di UNO nella scheda */
+.f-var{display:inline-flex;gap:4px;margin:2px 0 10px;padding:3px;border-radius:999px;background:rgba(255,255,255,.07)}
+.f-var[hidden]{display:none}
+.f-var button{border:0;border-radius:999px;padding:6px 14px;font:600 13px system-ui,sans-serif;color:#c7c7cc;background:transparent;cursor:pointer}
+.f-var button.su{background:#fff;color:#000}

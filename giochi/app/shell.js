@@ -9,6 +9,7 @@
    NON contiene segreti. Non tocca soldi: la mini app qui non ha un saldo. */
 (function () {
   'use strict';
+  var FIGLIA = !!window.GXDC_FIGLIA;   // lotto 3: una pagina a parte (Lupus, Last Call...) dentro l'index
   var q = new URLSearchParams(location.search);
   var P = null;
   try { if (parent && parent !== window && parent.GXD) P = parent.GXD; } catch (e) { P = null; }
@@ -23,6 +24,13 @@
     try { parent.postMessage({gx: cosa, gioco: D.gioco}, location.origin); } catch (e) {}
   }
   D.alCatalogo = alCatalogo;
+  var EXTRA = {};                     // integrazione dei lotti 4-7: GXDC_EXTRA(id, {...}) (vedi fase2/INTEGRAZIONE.md)
+  D.extra = EXTRA;
+  function chiama(id, k, arg) { var X = EXTRA[id]; if (X && typeof X[k] === 'function') { try { X[k](arg); } catch (e) { console.warn('[discord] extra ' + id + '.' + k, e); } } }
+  if (D.gioco) document.documentElement.classList.add('gx-' + D.gioco);
+  if (FIGLIA) {
+    try { var PD = parent.GXDC; if (PD) { D.io = PD.io; D.sessione = PD.sessione; D.gioco = PD.gioco; } } catch (e) {}
+  }
 
   // ── Telegram finto (lo legge l'index all'avvio: S.userId, nome, foto) ──
   function nulla() {}
@@ -107,6 +115,11 @@
       P2[k] = function (t) {
         // la moneta col «€» (cibo di Snake): una stella
         if (t === '€') { var b = Array.prototype.slice.call(arguments); b[0] = '★'; return o.apply(this, b); }
+        if (typeof t === 'string' && t.indexOf('€') >= 0) {
+          var e2 = Array.prototype.slice.call(arguments);
+          e2[0] = t.replace(/€\s?(\d[\d.,]*)/g, '$1 pt').replace(/(\d[\d.,]*)\s?€/g, '$1 pt').replace(/€/g, '');
+          return o.apply(this, e2);
+        }
         if (typeof t === 'string' && /gambler|casin[oò]/i.test(t)) {
           var a = Array.prototype.slice.call(arguments);
           a[0] = t.replace(/\bgambler'?s?\s*/gi, '').replace(/\bcasin[oò]\s*/gi, '').trim();
@@ -117,6 +130,53 @@
       };
     });
   })();
+
+  if (FIGLIA) { try { if (parent.Telegram) window.Telegram = parent.Telegram; } catch (e) {} }
+
+  // lotto 3: le pagine a parte della mini app (Lupus, Last Call, Kaiju, Dead Quiz...) hanno anche loro script e
+  // gestori in linea: l'iframe che l'index apre su «lupus3d.html?...» si apre invece su figlia.html, che carica la
+  // pagina vera attraverso /app e applica lo stesso strato (blob, gestori, testi) prima di scriverla.
+  var FIGLIE = /^(lupus3d|lastcall|kaiju|deadmoney|geo|settemezzo|briscola|tappo|poker|poker5|blackjack|deadpeak|tavolo3d)\.html(\?|$)/;
+  var PAGINE_EXTRA = [];             // integrazione: pagine a parte dichiarate dai lotti (GXDC_EXTRA ... pagina)
+  function figlia(u) {
+    var v = String(u == null ? '' : u);
+    var pag = v.split('?')[0];
+    if (!FIGLIE.test(v) && PAGINE_EXTRA.indexOf(pag) < 0) return v;
+    return (window.GXDC_RADICE || '/') + 'giochi/app/figlia.html?pg=' + encodeURIComponent(v);
+  }
+  D.figlia = figlia;
+  if (!FIGLIA) {
+    var dSrc = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'src');
+    if (dSrc && dSrc.set) {
+      // chi legge src (i gusci confrontano il loro indirizzo per non ricaricare) vede l'indirizzo ORIGINALE
+      Object.defineProperty(HTMLIFrameElement.prototype, 'src', {configurable: true, enumerable: dSrc.enumerable,
+        get: function () {
+          var vero = dSrc.get.call(this);
+          if (this.__gxsrc != null && this.__gxfig === vero) { try { return new URL(this.__gxsrc, document.baseURI).href; } catch (e) {} }
+          return vero;
+        },
+        set: function (v) {
+          var f = figlia(v);
+          if (f !== String(v)) { this.__gxsrc = String(v); dSrc.set.call(this, f); this.__gxfig = dSrc.get.call(this); return; }
+          this.__gxsrc = null;
+          return dSrc.set.call(this, v);
+        }});
+    }
+    var setA0 = Element.prototype.setAttribute, getA0 = Element.prototype.getAttribute;
+    Element.prototype.setAttribute = function (n, v) {
+      if (this instanceof HTMLIFrameElement && String(n).toLowerCase() === 'src') {
+        var f = figlia(v);
+        if (f !== String(v)) { this.__gxsrc = String(v); setA0.call(this, n, f); this.__gxfig = dSrc && dSrc.get ? dSrc.get.call(this) : f; this.__gxattr = f; return; }
+        this.__gxsrc = null;
+      }
+      return setA0.call(this, n, v);
+    };
+    Element.prototype.getAttribute = function (n) {
+      var v = getA0.call(this, n);
+      if (this instanceof HTMLIFrameElement && this.__gxsrc != null && String(n).toLowerCase() === 'src' && v != null && v.indexOf('figlia.html?pg=') >= 0) return this.__gxsrc;
+      return v;
+    };
+  }
 
   // ── il server real-time: indirizzo via la mapping /api, hello con la sessione Discord ──
   var api = CFG.apiBase || '/api';
@@ -133,6 +193,14 @@
         Object.keys(m.names).forEach(function (u) {
           var n = m.profiles[u] && m.profiles[u].name;
           if (n && String(u).indexOf('dc:') === 0) { NOMI[u] = n; m.names[u] = n; cambiato = true; }
+          // il bot «Duke» (nome del motore) dentro Discord si chiama «Pixel»
+          if (String(u).indexOf('bot:') === 0 && /^duke$/i.test(String(m.names[u] || ''))) {
+            NOMI[u] = 'Pixel'; m.names[u] = 'Pixel'; if (m.profiles[u]) m.profiles[u].name = 'Pixel'; cambiato = true;
+          }
+        });
+      } else if (m.t === 'start' && m.names) {
+        Object.keys(m.names).forEach(function (u) {
+          if (String(u).indexOf('bot:') === 0 && /^duke$/i.test(String(m.names[u] || ''))) { NOMI[u] = 'Pixel'; m.names[u] = 'Pixel'; cambiato = true; }
         });
       } else if (m.t === 'over' && m.winner && NOMI[m.winner]) { m.winner_name = NOMI[m.winner]; cambiato = true; }
       if (!cambiato) return ev;
@@ -178,6 +246,20 @@
   // niente benvenuto/onboarding: si entra da un collegamento diretto (la mini app lo salta con GB_DEEP)
   window.GB_DEEP = true;
   try { localStorage.setItem('gb_onboarded', '1'); } catch (e) {}
+  // lotto 2: le tele delle carte su PC orizzontale prendono la forma della zona di gioco (larghe), invece della
+  // colonna 1,5 del telefono. Solo i giochi in CARTE_LARGHE (provati uno per uno); il telefono non cambia.
+  var CARTE_LARGHE = {uno: 1.25, unoc: 1.25, cucu: 1.25, uomonero: 1.0};   // rapporto alto/largo minimo per gioco
+  window.GXDC_CARTE_LARGHE = CARTE_LARGHE;
+  window.GXDC_RAPPORTO = function (g, wrap) {
+    var X = EXTRA[g];
+    if (X && typeof X.rapporto === 'function') { try { var rx = X.rapporto(wrap); if (rx) return rx; } catch (e) {} }
+    if (!CARTE_LARGHE[g] || innerWidth < innerHeight * 1.15 || innerHeight < 320) return null;
+    try {
+      var r = wrap.getBoundingClientRect(), W = r.width || innerWidth, H = r.height || (innerHeight - 160);
+      if (W < 500 || H < 240) return null;
+      return Math.max(CARTE_LARGHE[g], Math.min(1.5, H / W));
+    } catch (e) { return null; }
+  };
   window.GXDC_LARGO = function (wrap) {
     // T1: la larghezza vera della zona di gioco (il 340 di riserva era la misura presa prima del layout)
     try {
@@ -195,9 +277,16 @@
     try { if (!S.userId) S.userId = String(io.id); S.name = io.nome || S.name; } catch (e) {}
     document.documentElement.classList.add('gxdc');
     try { window.focus(); } catch (e) {}
-    if (D.ticket && RTD_G[D.gioco]) {
+    var XE = EXTRA[D.gioco];   // lotto 4: giochi col client loro (turf/glad/tank): entra(D) e schermo
+    if (D.ticket && XE && typeof XE.entra === 'function') {
+      var aperto = false;
+      try { aperto = !!XE.entra(D); } catch (e) { console.warn('[discord] extra ' + D.gioco + '.entra', e); }
+      if (!aperto) { alCatalogo('errore'); return; }
+      setTimeout(function () { chiama(D.gioco, 'dopo', D); }, 0);
+    } else if (D.ticket && RTD_G[D.gioco]) {
       window.RTD_TICKET = D.ticket; window.RTD_TICKET_GAME = D.gioco; window.RTD_GAME = D.gioco; window.RTD_PRACTICE = D.pratica;
       go('arc');
+      setTimeout(function () { chiama(D.gioco, 'dopo', D); }, 0);
     } else {
       alCatalogo('errore');
       return;
@@ -205,7 +294,7 @@
     // da qui in poi ogni uscita dalla partita torna al catalogo
     var go0 = window.go;
     window.go = function (id) {
-      if (id === 'arc') return go0.apply(this, arguments);
+      if (id === 'arc' || (XE && XE.schermo && id === XE.schermo)) return go0.apply(this, arguments);
       clearTimeout(D.tAncora);
       if (!D.chiuso) { D.chiuso = true; alCatalogo('fine'); }
     };
@@ -224,13 +313,60 @@
     // dopo la partita la mini app rimette la lobby (posta, tavoli a soldi) sotto la scheda di fine: qui niente lobby,
     // sotto resta il campo dell'ultima partita
     window.rtdShowLobby = function () {};
+    // Snake dentro Discord: niente fiche, dadi e monete da casino. Il corpo dei serpenti diventa a perle lucide,
+    // il cibo frutta e gemme (stesse misure degli sprite originali, cosi' il disegno della partita non cambia)
+    if (typeof window.snwSprite === 'function' && !window.snwSprite._gx) {
+      var spr0 = window.snwSprite;
+      var tela = function (s) { var c = document.createElement('canvas'); c.width = c.height = Math.max(2, Math.ceil(s)); return c; };
+      var perla = function (c, col, scuro) {
+        var s = Math.ceil(c * 1.1), cv = tela(s), x = cv.getContext('2d'), r = s / 2 - 1;
+        x.translate(s / 2, s / 2);
+        var g = x.createRadialGradient(-r * 0.35, -r * 0.4, r * 0.1, 0, 0, r);
+        g.addColorStop(0, '#ffffff'); g.addColorStop(0.25, col); g.addColorStop(1, scuro);
+        x.fillStyle = g; x.beginPath(); x.arc(0, 0, r, 0, 6.283); x.fill();
+        return cv;
+      };
+      var gemma = function (c, col, scuro, k) {
+        var s = Math.ceil(c * (k || 1.0)), cv = tela(s), x = cv.getContext('2d'), r = s / 2 - 1;
+        x.translate(s / 2, s / 2);
+        x.fillStyle = scuro; x.beginPath(); x.moveTo(0, -r); x.lineTo(r * 0.9, -r * 0.2); x.lineTo(0, r); x.lineTo(-r * 0.9, -r * 0.2); x.closePath(); x.fill();
+        x.fillStyle = col; x.beginPath(); x.moveTo(0, -r * 0.8); x.lineTo(r * 0.62, -r * 0.18); x.lineTo(0, r * 0.72); x.lineTo(-r * 0.62, -r * 0.18); x.closePath(); x.fill();
+        x.fillStyle = 'rgba(255,255,255,.75)'; x.beginPath(); x.moveTo(0, -r * 0.8); x.lineTo(r * 0.3, -r * 0.2); x.lineTo(-r * 0.3, -r * 0.2); x.closePath(); x.fill();
+        return cv;
+      };
+      var mela = function (c) {
+        var s = Math.ceil(c * 0.9), cv = tela(s), x = cv.getContext('2d'), r = s / 2 - 1;
+        x.translate(s / 2, s / 2 + r * 0.08);
+        var g = x.createRadialGradient(-r * 0.3, -r * 0.3, r * 0.1, 0, 0, r);
+        g.addColorStop(0, '#ff9a8a'); g.addColorStop(0.5, '#e8263a'); g.addColorStop(1, '#7a0a16');
+        x.fillStyle = g; x.beginPath(); x.arc(0, r * 0.05, r * 0.82, 0, 6.283); x.fill();
+        x.strokeStyle = '#5a3a1a'; x.lineWidth = Math.max(1, r * 0.12); x.beginPath(); x.moveTo(0, -r * 0.6); x.lineTo(r * 0.1, -r * 0.95); x.stroke();
+        x.fillStyle = '#3ecf5a'; x.beginPath(); x.ellipse(r * 0.35, -r * 0.8, r * 0.3, r * 0.14, -0.5, 0, 6.283); x.fill();
+        return cv;
+      };
+      window.snwSprite = function (c) {
+        var R = spr0(c);
+        if (R && !R._gx) {
+          try {
+            R.me = perla(c, '#38e1ff', '#0b5d78'); R.lui = perla(c, '#ff4d6d', '#7a1430');
+            R.oro = gemma(c * 1.1, '#ffd75a', '#8a5a00'); R.rossa = gemma(c * 1.1, '#ff5a6e', '#5a0a16'); R.blu = gemma(c * 1.1, '#5b8cff', '#10225a');
+            R.moneta = mela(c); R.dado = gemma(c * 0.82, '#7df3ff', '#0b5d78');
+            R._gx = 1;
+          } catch (e) {}
+        }
+        return R;
+      };
+      window.snwSprite._gx = 1;
+    }
     // la «rivincita vera» della mini app (XQ: {t:'riv_chiedi'} al server) non vale per Discord (verbo non permesso a un
     // dc:): spenta, cosi' «Rivincita» chiama rtdAgain qui sopra e il catalogo riapre la sala
     try { if (window.XQ) XQ.on = false; } catch (e) {}
     window.rtdPracToReal = function () { D.chiuso = true; alCatalogo('fine'); };
   }
-  if (document.readyState === 'complete') setTimeout(entra, 0);
-  else addEventListener('load', function () { setTimeout(entra, 0); });
+  if (!FIGLIA) {
+    if (document.readyState === 'complete') setTimeout(entra, 0);
+    else addEventListener('load', function () { setTimeout(entra, 0); });
+  }
 
   // ── i testi: niente soldi, niente marchio (come in Smash) ──
   var VIA = [
@@ -238,8 +374,11 @@
     [/\bfiche\b/gi, 'gettone'], [/\bpiatto\b/gi, 'partita'],
     [/\s*[·,-]?\s*nessuna posta,?\s*(e\s+)?nessun premio\.?/gi, ''], [/\s*[·,-]?\s*no stake,?\s*(and\s+)?no prize\.?/gi, ''],
     [/nessun premio:\s*è allenamento/gi, 'Solo allenamento'], [/no prize:\s*(it'?s )?practice/gi, 'Just practice'],
-    [/\s*[·,-]?\s*nessun premio\.?/gi, ''], [/nessun euro in gioco/gi, ''], [/no euros? (at stake|in play)/gi, ''],
+    [/\s*[·,-]?\s*nessun premio\.?/gi, ''], [/nessun euro in gioco/gi, ''],
+    [/\s*[:·,-]?\s*nessuna puntata\.?/gi, ''], [/\s*[:·,-]?\s*niente soldi in palio\.?/gi, ''], [/\s*[:·,-]?\s*no money at stake\.?/gi, ''], [/verifica della posta/gi, 'Preparo il tavolo'], [/checking (the )?stake/gi, 'Setting up the table'], [/no euros? (at stake|in play)/gi, ''],
     [/(piatto|partita|pot)\s*€\s*[\d.,]+/gi, ''], [/[+-]?€\s?0[.,]00(?![\d])/g, ''],
+    [/€\s?(\d[\d.,]*)/g, '$1 pt'], [/(\d[\d.,]*)\s?€/g, '$1 pt'],   // cifre del gioco (es. l'asta di Lupus): punti, non euro
+    [/\bbisca\b/gi, 'Mano sul mazzo'],   // nome neutro deciso in fase 1
     [/\bgambler\b/gi, ''], [/torna all[’']arena/gi, 'Torna ai giochi'], [/back to the arena/gi, 'Back to the games']
   ];
   function pulisci(n) {
@@ -259,4 +398,17 @@
       else for (var j = 0; j < rec[i].addedNodes.length; j++) pulisci(rec[i].addedNodes[j]);
     }
   }).observe(document.documentElement, {childList: true, subtree: true, characterData: true});
+
+  // ── integrazione dei lotti: ogni gioco si registra (giochi/app/extra.js, costruito dall'integratore) ──
+  window.GXDC_EXTRA = function (id, o) {
+    o = o || {};
+    EXTRA[id] = o;
+    if (o.pagina && PAGINE_EXTRA.indexOf(o.pagina) < 0) PAGINE_EXTRA.push(o.pagina);
+    if (id !== D.gioco) return;
+    // i testi di un gioco valgono solo quando e' aperto QUEL gioco
+    if (o.testi && o.testi.length) for (var i = 0; i < o.testi.length; i++) VIA.push(o.testi[i]);
+    chiama(id, 'prima', D);
+    if (FIGLIA) addEventListener('load', function () { chiama(id, 'dopo', D); chiama(id, 'figlia', window); });
+  };
+  if (FIGLIA) { document.documentElement.classList.add('gxdc'); if (D.gioco) document.documentElement.classList.add('gx-' + D.gioco); }
 })();

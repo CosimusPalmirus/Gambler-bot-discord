@@ -21,6 +21,17 @@
   var GIOCHI_ATTIVI = CFG.giochiAttivi || ['pong'];
   // fase 2: i giochi che si aprono dalla MINI APP online (app.html, mapping /app) invece che da un client nostro
   var GIOCHI_APP = CFG.giochiApp || [];
+  // lotto 2: nel catalogo c'e' un solo «UNO»; sul server sono due giochi (classico «unoc», No Mercy «uno»).
+  // La scheda del gioco sceglie la variante (GXD.unoVariante); sale, code e biglietti sono per variante.
+  function srv(g) { return g === 'uno' ? ((window.GXD && GXD.unoVariante) || 'unoc') : varianteDi(g); }
+  // lotto 5: Biliardo (pool8/pool15) e Dama (dama/damaru) come UNO: la variante scelta nella scheda, di serie la prima
+  function varianteDi(g) {
+    if (g === 'uno') return (window.GXD && GXD.unoVariante) || 'unoc';
+    var VV = (window.GX_VARIANTI || {})[g], v = window.GXD && GXD.variante && GXD.variante[g];
+    if (!VV) return g;
+    for (var i = 0; i < VV.length; i++) if (VV[i][0] === v) return v;
+    return VV[0][0];
+  }
 
   var q = new URLSearchParams(location.search);
   var dentroDiscord = q.has('frame_id') && q.has('instance_id');
@@ -91,6 +102,10 @@
       });
     }).then(function (t) {
       GXD.sessione = t.sessione || null;
+      // lotto 2: un gioco e' acceso solo se lo e' ANCHE sul server (le Pages possono arrivare prima del backend)
+      api('GET', '/discord/me').then(function (m) {
+        if (m && m.ok && m.giochi && m.giochi.length) GIOCHI_ATTIVI = GIOCHI_ATTIVI.filter(function (g) { return m.giochi.indexOf(g) >= 0; });
+      }, function () {});
       // 16/11: dopo il login col NOSTRO server non si torna MAI al finto; ogni passo dopo e' facoltativo
       var ioSrv = t.io ? dalServer(t.io) : null;
       return Promise.resolve().then(function () { return sdk.commands.authenticate({access_token: t.access_token}); })
@@ -139,6 +154,7 @@
     onPartecipanti: function (f) { ascoltaPart.push(f); },
     onLayout: function (f) { ascoltaLayout.push(f); },
     /* nel modo vero solo i giochi accesi sul server (fase 1: Neon Pong); nel finto tutti, come nel prototipo */
+    varianteDi: varianteDi,
     attivo: function (gioco) { return !GXD.vero || GIOCHI_ATTIVI.indexOf(gioco) >= 0; },
     avatar: foto,
 
@@ -152,7 +168,7 @@
       }
       if (modo === 'bot') {
         var annullato = false;
-        api('POST', '/discord/partita', {gioco: gioco, modo: 'bot'}).then(function (r) {
+        api('POST', '/discord/partita', {gioco: srv(gioco), modo: 'bot'}).then(function (r) {
           if (annullato) return;
           if (r.ok && r.ticket) onStato({stato: 'via', ticket: r.ticket, avversari: [], pratica: true});
           else onStato({stato: 'errore', errore: r.errore || ('http ' + r._codice)});
@@ -161,8 +177,8 @@
       }
       var primo = true, finito = false;
       var g = giro(function () {
-        var p = primo ? api('POST', '/discord/partita', {gioco: gioco, modo: 'canale', instance_id: instanceId})
-                      : api('GET', '/discord/partita?gioco=' + encodeURIComponent(gioco));
+        var p = primo ? api('POST', '/discord/partita', {gioco: srv(gioco), modo: 'canale', instance_id: instanceId})
+                      : api('GET', '/discord/partita?gioco=' + encodeURIComponent(srv(gioco)));
         primo = false;
         return p.then(function (r) {
           if (finito) return true;
@@ -180,11 +196,11 @@
       return {annulla: function () {
         if (finito) return;
         finito = true; g.ferma();
-        api('DELETE', '/discord/partita', {gioco: gioco});
+        api('DELETE', '/discord/partita', {gioco: srv(gioco)});
       }, avvia: function (bot) {
         // «Inizia la partita» (giochi da 2 a 4): parte con chi c'e'; bot=true i posti vuoti ai bot del motore
         if (finito) return;
-        api('POST', '/discord/partita', {gioco: gioco, modo: 'canale', instance_id: instanceId, avvia: 1, bot: bot ? 1 : 0});
+        api('POST', '/discord/partita', {gioco: srv(gioco), modo: 'canale', instance_id: instanceId, avvia: 1, bot: bot ? 1 : 0});
       }};
     },
 
@@ -203,7 +219,7 @@
         var proto = location.protocol === 'https:' ? 'wss://' : 'ws://';
         var wsUrl = CFG.wsUrl || (proto + location.host + API + '/turfws');
         if (GIOCHI_APP.indexOf(gioco) >= 0 && window.GXApp) {
-          return window.GXApp.avvia({gioco: gioco, ticket: ticket, pratica: !!opz.pratica, onFine: opz.onFine});
+          return window.GXApp.avvia({gioco: srv(gioco), ticket: ticket, pratica: !!opz.pratica, onFine: opz.onFine});
         }
         if (gioco === 'smash' && window.GXSmash) {
           // Smash: la pagina del gioco (arena.html) in un iframe; l'allenamento coi bot gira tutto li' dentro
@@ -229,9 +245,9 @@
     if (GIOCHI_APP.indexOf(gioco) >= 0) gioco = 'app';
     if (caricati[gioco]) return caricati[gioco];
     caricati[gioco] = new Promise(function (ok, ko) {
-      var c = document.createElement('link'); c.rel = 'stylesheet'; c.href = 'giochi/' + gioco + '/' + gioco + '.css?v=1611c';
+      var c = document.createElement('link'); c.rel = 'stylesheet'; c.href = 'giochi/' + gioco + '/' + gioco + '.css?v=1711l3';
       document.head.appendChild(c);
-      var s = document.createElement('script'); s.src = 'giochi/' + gioco + '/' + gioco + '.js?v=1611c';
+      var s = document.createElement('script'); s.src = 'giochi/' + gioco + '/' + gioco + '.js?v=1711l3';
       s.onload = ok; s.onerror = function () { caricati[gioco] = null; ko(new Error('gioco non trovato')); };
       document.head.appendChild(s);
     });
@@ -240,7 +256,7 @@
 
   function codaVera(gioco, onStato) {
     var ticket = null, chiusa = false, g = null;
-    api('POST', '/discord/coda', {gioco: gioco}).then(function (r) {
+    api('POST', '/discord/coda', {gioco: srv(gioco)}).then(function (r) {
       if (!r.ok || !r.ticket) { onStato({stato: 'errore', errore: r.errore}); return; }
       ticket = r.ticket;
       if (chiusa) return esci();

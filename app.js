@@ -180,6 +180,20 @@
     $('f-dur').textContent = g.durata;
     $('f-bot').textContent = g.bot ? 'Sì' : 'No';
     $('f-nota').textContent = notaCanale(g);
+    // lotto 2: UNO ha due varianti (due giochi sul server): la scelta vale per sala, coda e allenamento
+    // lotto 5: le varianti di ogni gioco (UNO, Biliardo, Dama) da GX_VARIANTI
+    var fv = $('f-var'), VV = (window.GX_VARIANTI || {})[g.id];
+    fv.hidden = !VV;
+    if (VV) {
+      var scelta = window.GXD.varianteDi ? window.GXD.varianteDi(g.id) : VV[0][0];
+      fv.innerHTML = '';
+      VV.forEach(function (v) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.setAttribute('role', 'radio'); b.setAttribute('data-v', v[0]); b.textContent = v[1];
+        b.classList.toggle('su', v[0] === scelta); b.setAttribute('aria-checked', v[0] === scelta ? 'true' : 'false');
+        fv.appendChild(b);
+      });
+    }
     var tb = $('t-bot'), on = window.GXD.attivo(g.id);
     tb.disabled = !g.bot || !on;
     tb.innerHTML = (g.bot && on) ? 'Allenati coi bot' : 'Allenati coi bot <small>· presto</small>';
@@ -433,6 +447,17 @@
     }
   });
   $('velo').addEventListener('click', function (e) { if (e.target === this) chiudi(); });
+  $('f-var').addEventListener('click', function (e) {
+    var b = e.target && e.target.closest ? e.target.closest('button[data-v]') : null;
+    if (!b || !stato.aperto) return;
+    var v = b.getAttribute('data-v');
+    window.GXD.variante = window.GXD.variante || {};
+    window.GXD.variante[stato.aperto.id] = v;
+    if (stato.aperto.id === 'uno') window.GXD.unoVariante = v;   // come prima del lotto 5
+    [].forEach.call(this.querySelectorAll('button'), function (x) {
+      x.classList.toggle('su', x === b); x.setAttribute('aria-checked', x === b ? 'true' : 'false');
+    });
+  });
   $('chiudi').addEventListener('click', chiudi);
   $('t-canale').addEventListener('click', function () { var g = stato.aperto; if (!g) return; chiudi(); apriSala(g, 'canale'); });
   $('t-bot').addEventListener('click', function () {
