@@ -2589,3 +2589,16 @@ GXDC_EXTRA('hop', {
   }
 });
 
+
+
+/* ── race_discord_2011 · race3d.js ── */
+/* DISCORD 20/11 — STREET RACE in 3D come su Telegram.
+   La mini app (gbx_race3d.js, base()) accende il 3D dentro Discord SOLO se lo strato lo dichiara:
+     if (discord() && !window.GXDC_RACE3D) return false;   // «solo se lo strato apre race3d.html via figlia (CSP)»
+   e lo strato non lo dichiarava: ne' GXDC_RACE3D ne' race3d.html tra le pagine a parte -> sempre 2D.
+   1) race3d.html passa da figlia.html (il suo unico script e' in linea: con la CSP di Discord va messo in un blob),
+      esattamente come derby3d.html / gcr3d.html / golf3d.html. Le auto (race3d/auto/*.glb) e three.js (dentro la pagina)
+      arrivano dalla mapping /app gia' esistente: nessuna mapping nuova.
+   2) GXDC_RACE3D = true: da qui la scala di ripiego e' la stessa di Telegram (WebGL2, fps, ponte non pronto -> 2D). */
+window.GXDC_RACE3D = true;
+GXDC_EXTRA('race', {pagina: 'race3d.html'});
