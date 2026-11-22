@@ -72,7 +72,28 @@
 
   // integrazione dei lotti 4-7 (fase2/INTEGRAZIONE.md): extra.js / extra.css / toppe.js, costruiti dall'integratore; se mancano, niente
   function forse(u) { return testo(u).catch(function () { return ''; }); }
-  Promise.all([testo(APP + (FIGLIA ? PG : 'index.html')), testo(radice + 'giochi/app/shell.js?v=' + VER), testo(radice + 'giochi/app/shell.css?v=' + VER),
+  // MINIAPP LEGGERA (23/11/2026, _levelup/miniapp_leggera_2311): l'index della mini app puo' arrivare SPEZZATO, con gli
+  // script grossi in file a parte <script [id="..."] src="ml/<nome>.<impronta>.js"></script>. Qui si rimettono IN LINEA,
+  // stesso testo e stesso posto, PRIMA delle toppe: le ancore (T1, L2, T3, T4, toppe.js) trovano il codice come prima e
+  // scriptInBlob li trasforma in blob come sempre. I file hanno l'impronta nel nome: la cache normale del browser va
+  // bene. Con l'index intero di prima non c'e' niente da rimettere e l'HTML resta identico (compatibile coi due).
+  // I fogli <link rel="stylesheet" href="ml_....css"> e le immagini ml/i_... restano file: li risolve il <base> verso /app/.
+  function rimettiInLinea(html) {
+    if (FIGLIA) return Promise.resolve(html);
+    var re = /<script((?:\s+id="[^"]*")?)\s+src="(ml\/[A-Za-z0-9._-]+\.js)"><\/script>/g, pezzi = [], m;
+    while ((m = re.exec(html))) pezzi.push({a: m.index, b: m.index + m[0].length, attr: m[1], src: m[2]});
+    if (!pezzi.length) return Promise.resolve(html);
+    return Promise.all(pezzi.map(function (p) {
+      return fetch(APP + p.src).then(function (r) { if (!r.ok) throw new Error(p.src + ' ' + r.status); return r.text(); });
+    })).then(function (testi) {
+      var out = [], da = 0;
+      pezzi.forEach(function (p, i) { out.push(html.slice(da, p.a), '<script' + p.attr + '>', testi[i], '</script>'); da = p.b; });
+      out.push(html.slice(da));
+      window.GXDC_ML = pezzi.length;
+      return out.join('');
+    });
+  }
+  Promise.all([testo(APP + (FIGLIA ? PG : 'index.html')).then(rimettiInLinea), testo(radice + 'giochi/app/shell.js?v=' + VER), testo(radice + 'giochi/app/shell.css?v=' + VER),
                forse(radice + 'giochi/app/extra.js?v=' + VER), forse(radice + 'giochi/app/extra.css?v=' + VER), forse(radice + 'giochi/app/toppe.js?v=' + VER)])
     .then(function (r) {
       var html = r[0], shell = r[1], css = r[2] + '\n' + r[4], extra = r[3];
