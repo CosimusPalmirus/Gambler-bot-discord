@@ -104,7 +104,7 @@
       GXD.sessione = t.sessione || null;
       // lotto 2: un gioco e' acceso solo se lo e' ANCHE sul server (le Pages possono arrivare prima del backend)
       api('GET', '/discord/me').then(function (m) {
-        if (m && m.ok && m.giochi && m.giochi.length) GIOCHI_ATTIVI = GIOCHI_ATTIVI.filter(function (g) { return m.giochi.indexOf(g) >= 0; });
+        if (m && m.ok && m.giochi && m.giochi.length) GIOCHI_ATTIVI = GIOCHI_ATTIVI.filter(function (g) { return m.giochi.indexOf(g) >= 0 || g === 'gembrawl'; });   // GEMBRAWL_2811: allenamento solo nella pagina
       }, function () {});
       // 16/11: dopo il login col NOSTRO server non si torna MAI al finto; ogni passo dopo e' facoltativo
       var ioSrv = t.io ? dalServer(t.io) : null;
@@ -221,6 +221,9 @@
         if (GIOCHI_APP.indexOf(gioco) >= 0 && window.GXApp) {
           return window.GXApp.avvia({gioco: srv(gioco), ticket: ticket, pratica: !!opz.pratica, guarda: opz.guarda || '', onFine: opz.onFine});
         }
+        if (gioco === 'gembrawl' && window.GXGemBrawl) {   // GEMBRAWL_2811: gembrawl.html in un iframe, coi bot tutto nella pagina
+          return window.GXGemBrawl.avvia({pratica: true, io: GXD.io, onFine: opz.onFine});
+        }
         if (gioco === 'smash' && window.GXSmash) {
           // Smash: la pagina del gioco (arena.html) in un iframe; l'allenamento coi bot gira tutto li' dentro
           return window.GXSmash.avvia({pratica: !!opz.pratica, ticket: ticket, sessione: GXD.sessione, wsUrl: wsUrl,
@@ -237,7 +240,7 @@
       });
     },
     /* i giochi il cui allenamento coi bot gira tutto nella pagina (niente server, anche fuori da Discord) */
-    praticaLocale: function (gioco) { return gioco === 'smash'; }
+    praticaLocale: function (gioco) { return gioco === 'smash' || gioco === 'gembrawl'; }
   };
 
   var caricati = {};
@@ -245,9 +248,9 @@
     if (GIOCHI_APP.indexOf(gioco) >= 0) gioco = 'app';
     if (caricati[gioco]) return caricati[gioco];
     caricati[gioco] = new Promise(function (ok, ko) {
-      var c = document.createElement('link'); c.rel = 'stylesheet'; c.href = 'giochi/' + gioco + '/' + gioco + '.css?v=1711l10';
+      var c = document.createElement('link'); c.rel = 'stylesheet'; c.href = 'giochi/' + gioco + '/' + gioco + '.css?v=2811gb';
       document.head.appendChild(c);
-      var s = document.createElement('script'); s.src = 'giochi/' + gioco + '/' + gioco + '.js?v=1711l10';
+      var s = document.createElement('script'); s.src = 'giochi/' + gioco + '/' + gioco + '.js?v=2811gb';
       s.onload = ok; s.onerror = function () { caricati[gioco] = null; ko(new Error('gioco non trovato')); };
       document.head.appendChild(s);
     });

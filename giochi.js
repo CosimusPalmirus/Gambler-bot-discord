@@ -31,6 +31,8 @@ window.GX_GIOCHI = [
    descr:'Corsa verso la vetta: trappole a ritmo, spinte agli avversari e lava che sale. Il primo in cima vince.'},
   {id:'smash',   cat:'live',  nome:'Smash', sotto:'Picchiaduro: buttali fuori', min:2, max:4, durata:'~4 min', bot:true, ban:true,
    descr:'Il picchiaduro: tanti lottatori, arene diverse, tre vite a testa. Buttali fuori dal ring.'},
+  {id:'gembrawl', cat:'live',  nome:'Gem Brawl', sotto:'Eroi in arena 3D: duello, 3 contro 3, sopravvivenza', min:2, max:6, durata:'~3 min', bot:true, ban:true, soloBot:true /* 28/11: per ora solo l'allenamento coi bot, tutto nella pagina */,
+   descr:'Arena vista dall\'alto con tredici eroi, ognuno con attacco, super e gadget. Duello uno contro uno, Arraffa gemme tre contro tre o Sopravvivenza a sei. Per ora si gioca contro i bot.'},
   {id:'tank',    cat:'live',  nome:'Tank Duel', sotto:'Carri armati, uno contro uno', min:2, max:2, durata:'~2 min', bot:true,
    descr:'Due carri armati, sponde e missili. Chi colpisce per primo l\'altro tre volte vince.'},
   {id:'sbanca',  cat:'live',  nome:'SBANCA!', sotto:'Artiglieria a turni, il terreno si rompe', min:2, max:4, durata:'~6 min', bot:true,
@@ -123,4 +125,4 @@ window.GX_VARIANTI = {
 };
 
 /* ordine del carosello in alto: i giochi che stanno bene con tutto il canale */
-window.GX_CAROSELLO = ['smash','uno','calcio','glad','race','kaiju','burraco','scalata','uomonero'];
+window.GX_CAROSELLO = ['smash','gembrawl','uno','calcio','glad','race','kaiju','burraco','scalata','uomonero'];

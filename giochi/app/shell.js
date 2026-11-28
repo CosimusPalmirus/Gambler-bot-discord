@@ -28,7 +28,8 @@
       if (d && d.set) Object.defineProperty(IP, 'src', {configurable: true, enumerable: d.enumerable, get: d.get,
         set: function (v) { d.set.call(this, rif(v)); }});
       var sa0 = Element.prototype.setAttribute;
-      Element.prototype.setAttribute = function (k, v) {
+      // PRESTAZIONI P10: solo sulle <img> (prima: OGNI setAttribute della pagina passava di qui)
+      HTMLImageElement.prototype.setAttribute = function (k, v) {
         if (this instanceof HTMLImageElement && String(k).toLowerCase() === 'src') v = rif(String(v));
         return sa0.call(this, k, v);
       };
@@ -202,7 +203,8 @@
         }});
     }
     var setA0 = Element.prototype.setAttribute, getA0 = Element.prototype.getAttribute;
-    Element.prototype.setAttribute = function (n, v) {
+    // PRESTAZIONI P10: valgono solo per gli <iframe> (prima: ogni getAttribute/setAttribute di ogni elemento ci passava)
+    HTMLIFrameElement.prototype.setAttribute = function (n, v) {
       if (this instanceof HTMLIFrameElement && String(n).toLowerCase() === 'src') {
         var f = figlia(v);
         if (f !== String(v)) { this.__gxsrc = String(v); setA0.call(this, n, f); this.__gxfig = dSrc && dSrc.get ? dSrc.get.call(this) : f; this.__gxattr = f; return; }
@@ -210,7 +212,7 @@
       }
       return setA0.call(this, n, v);
     };
-    Element.prototype.getAttribute = function (n) {
+    HTMLIFrameElement.prototype.getAttribute = function (n) {
       var v = getA0.call(this, n);
       if (this instanceof HTMLIFrameElement && this.__gxsrc != null && String(n).toLowerCase() === 'src' && v != null && v.indexOf('figlia.html?pg=') >= 0) return this.__gxsrc;
       return v;
@@ -225,7 +227,8 @@
   var NOMI = {};
   function sistema(ev) {
     var d = ev && ev.data;
-    if (typeof d !== 'string' || (d.indexOf('"start"') < 0 && d.indexOf('"over"') < 0)) return ev;
+    // PRESTAZIONI P7: si decodifica solo un messaggio di tipo start/over (prima: ogni messaggio che conteneva la parola)
+    if (typeof d !== 'string' || !/"t"\s*:\s*"(?:start|over)"/.test(d)) return ev;
     try {
       var m = JSON.parse(d), cambiato = false;
       if (m.t === 'start' && m.names && m.profiles) {
@@ -431,11 +434,14 @@
     [/\bbisca\b/gi, 'Mano sul mazzo'],   // nome neutro deciso in fase 1
     [/\bgambler\b/gi, ''], [/torna all[’']arena/gi, 'Torna ai giochi'], [/back to the arena/gi, 'Back to the games']
   ];
+  // PRESTAZIONI P6: le 25 regole di base si provano solo se nel testo c'e' una delle loro parole (ognuna delle regole ne
+  // contiene almeno una: senza parola-spia nessuna puo' cambiare niente). Le regole aggiunte dai giochi si provano sempre.
+  var VIA_BASE = VIA.length, VIA_SPIA = /gioca vera|gambler|fiche|piatto|posta|stake|premio|prize|euro|puntata|soldi|money|€|bisca|arena/i;
   function pulisci(n) {
     if (n.nodeType === 3) {
       var t = n.nodeValue, x = t;
       if (!t || t.length > 20000) return;
-      for (var i = 0; i < VIA.length; i++) x = x.replace(VIA[i][0], VIA[i][1]);
+      for (var i = VIA_SPIA.test(t) ? 0 : VIA_BASE; i < VIA.length; i++) x = x.replace(VIA[i][0], VIA[i][1]);
       if (x !== t) n.nodeValue = x;
       return;
     }

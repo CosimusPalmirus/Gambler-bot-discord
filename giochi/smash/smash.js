@@ -57,7 +57,7 @@
     (function () {
       var G = window.GXD || {}, d = function (t) { (G.avvisi = G.avvisi || []).push('smash: ' + t); if (window.GXDiagnosi) window.GXDiagnosi(); };
       try {
-        fetch('smash/roster.js?v=ec4e2a7b64d4', {cache: 'no-store'}).then(function (r) {
+        fetch('smash/roster.js?v=ec4e2a7b64d4', {cache: 'no-cache'})   /* PRESTAZIONI P9: 304 invece di 34 kB */.then(function (r) {
           if (!r.ok) d('file del gioco ' + r.status + ' (URL mapping /smash?)');
         }, function (e) { d('file del gioco non raggiungibili: ' + (e && e.message)); });
       } catch (e) { d('fetch: ' + e.message); }

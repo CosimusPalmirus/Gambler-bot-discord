@@ -18,7 +18,7 @@
   // la cartella di app.html ('/' dentro Discord); figlia.html sta in giochi/app/
   var radice = FIGLIA ? location.pathname.replace(/giochi\/app\/[^\/]*$/, '') : location.pathname.replace(/[^\/]*$/, '');
   var APP = radice + 'app/';
-  var VER = '20261118hp';   // FOTO_VERE_1711
+  var VER = '20261128pz';   // FOTO_VERE_1711
   // le librerie che le pagine a parte prendono da un CDN (bloccato dalla CSP di Discord): copie nel repo, vendor/
   var CDN = [
     [/https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/three\.js\/r128\/three\.min\.js/g, 'vendor/three/three.min.js'],
@@ -30,14 +30,22 @@
     [/https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/leaflet\/1\.9\.4\/leaflet\.min\.js/g, 'vendor/leaflet/leaflet.min.js'],
     [/https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/leaflet\/1\.9\.4\/leaflet\.min\.css/g, 'vendor/leaflet/leaflet.min.css']
   ];
-  function testo(u) { return fetch(u, {cache: 'no-cache'}).then(function (r) { if (!r.ok) throw new Error(u + ' ' + r.status); return r.text(); }); }
+  // PRESTAZIONI P1: i file dello strato Discord hanno ?v= nell'indirizzo: cache normale (prima: un giro di rete in piu' per
+  // ognuno a ogni apertura). L'index e le pagine della mini app restano 'no-cache' (sempre quelli online).
+  function testo(u) { return fetch(u, {cache: u.indexOf(radice + 'giochi/app/') === 0 && /[?&]v=/.test(u) ? 'default' : 'no-cache'}).then(function (r) { if (!r.ok) throw new Error(u + ' ' + r.status); return r.text(); }); }
   function attesa(t) { var e = document.getElementById('gx-attesa'); if (e) e.textContent = t; }
   function toppa(html, nome, re, a) {
     var n = (html.match(new RegExp(re.source, 'g')) || []).length;
     if (n !== 1) { console.warn('[discord] toppa saltata: ' + nome + ' (' + n + ' ancore)'); return html; }
     return html.replace(re, a);
   }
-  function blob(js) { return URL.createObjectURL(new Blob([js], {type: 'text/javascript'})); }
+  // PRESTAZIONI P2 (giochi/app/veloce.js nel catalogo): i blob li crea il catalogo e restano validi; dalla seconda apertura
+  // il documento gia' preparato si riusa se i testi letti (index online + strato) sono identici. Senza veloce.js: come prima.
+  // il catalogo e' il primo antenato dello stesso sito con GXDC_VELOCE (dentro Discord sopra il catalogo c'e' discord.com:
+  // un altro sito, che non si tocca: lo si capisce dall'eccezione e ci si ferma)
+  var V = (function () { var w = window; for (var i = 0; i < 4; i++) { try { if (w.parent === w) return null; w = w.parent; if (w.GXDC_VELOCE) return w.GXDC_VELOCE; } catch (e) { return null; } } return null; })();
+  var LOTTO = null, PAG = FIGLIA ? PG.split('?')[0] : 'index.html', PREPARA = !FIGLIA && !!V && /[?&]gxprepara=1/.test(location.search);
+  function blob(js) { return LOTTO ? LOTTO.blob(js) : URL.createObjectURL(new Blob([js], {type: 'text/javascript'})); }
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;'); }
 
   // gli script in linea -> script blob:. Scorre l'HTML come il parser: salta commenti e <style>, e da <script> salta
@@ -93,9 +101,26 @@
       return out.join('');
     });
   }
-  Promise.all([testo(APP + (FIGLIA ? PG : 'index.html')).then(rimettiInLinea), testo(radice + 'giochi/app/shell.js?v=' + VER), testo(radice + 'giochi/app/shell.css?v=' + VER),
+  Promise.all([testo(APP + (FIGLIA ? PG : 'index.html')), testo(radice + 'giochi/app/shell.js?v=' + VER), testo(radice + 'giochi/app/shell.css?v=' + VER),
                forse(radice + 'giochi/app/extra.js?v=' + VER), forse(radice + 'giochi/app/extra.css?v=' + VER), forse(radice + 'giochi/app/toppe.js?v=' + VER)])
+    .then(function (r) {   // PRESTAZIONI P2: il documento gia' preparato (stessi testi) o la preparazione di sempre
+      var crudi = r.slice(), M = V && V.prendi(PAG, crudi);
+      if (M) return {memo: M};
+      return (V && !PREPARA ? V.dopo(PAG) : Promise.resolve()).then(function () {   // chi prepara non aspetta se stesso
+        var M2 = V && V.prendi(PAG, crudi);
+        if (M2) return {memo: M2};
+        return rimettiInLinea(r[0]).then(function (h) { r[0] = h; r.crudi = crudi; return r; });
+      });
+    })
     .then(function (r) {
+      if (r.memo) {
+        if (PREPARA) { V.fatto(PAG); return; }
+        window.GXDC_SCRIPT = r.memo.n; if (r.memo.ml) window.GXDC_ML = r.memo.ml; window.GXDC_MEMO = true;
+        if (FIGLIA) { try { history.replaceState(null, '', APP + PG); } catch (e) {} }
+        document.open(); document.write(r.memo.html); document.close();
+        return;
+      }
+      LOTTO = V ? V.lotto() : null;
       var html = r[0], shell = r[1], css = r[2] + '\n' + r[4], extra = r[3];
       var toppeX = [];
       try { if (r[5]) toppeX = new Function('return (' + r[5] + ');')() || []; } catch (e) { console.warn('[discord] toppe.js non letto', e); }
@@ -103,6 +128,9 @@
       toppeX.forEach(function (t) { if (t && t.re && (t.pagina || 'index.html') === pagina) html = toppa(html, t.nome || '?', t.re, t.con); });
       // 1) niente script di Telegram (esterno: dentro Discord e' bloccato), niente Google Fonts (esterni), niente TON
       html = html.replace(/<script src="https:\/\/telegram\.org\/js\/telegram-web-app\.js"><\/script>/, '');
+      // PRESTAZIONI P4: TON Connect (460 kB, 129 kB compressi) serve solo al portafoglio, che dentro Discord non si apre
+      // (la mini app controlla sempre typeof TON_CONNECT_UI prima di usarlo)
+      html = html.replace(/<script src="tonconnect-ui\.min\.js"><\/script>/, '');
       html = html.replace(/<link[^>]+fonts\.(googleapis|gstatic)\.com[^>]*>/g, '');
       if (FIGLIA) {
         CDN.forEach(function (c) { html = html.replace(c[0], radice + c[1]); });
@@ -123,6 +151,11 @@
       //     invisibile ma cliccabile al centro dello schermo (pointer-events:auto in linea): mangiava i clic del gioco
       html = toppa(html, 'T4 guida chiusa non clicca', /\} else if \(box\) \{ box\.classList\.remove\('xpc-su'\); aperta = false; \}/,
         "} else if (box) { box.classList.remove('xpc-su'); aperta = false; if (box.firstChild && box.firstChild.style) box.firstChild.style.pointerEvents = ''; }   /* T4 */");
+      // PRESTAZIONI P5 (solo Discord): all'avvio la mini app dipinge le due auto dello stendardo Race del MENU DEI DUELLI e le
+      // converte in PNG (toDataURL: ~260 ms sul PC, x4 su un telefono). In Discord quel menu non si vede mai (ogni go()
+      // fuori dalla partita torna al catalogo): si salta, tranne che per Race. Nella mini app Telegram resta com'e'.
+      html = toppa(html, 'P5 stendardo Race', /\(function rcbBannerBake\(\)\{try\{/,
+        "(function rcbBannerBake(){if(window.GXDC&&GXDC.gioco!=='race')return;try{");
       }
       // 3) script in linea -> blob (CSP di Discord)
       var sb = scriptInBlob(html);
@@ -143,6 +176,8 @@
       // 5) in fondo: il CSS Discord (dopo tutto quello dell'index, cosi' vince)
       var i = html.lastIndexOf('</body>');
       if (i > 0 && !FIGLIA) html = html.slice(0, i) + '<style id="gx-discord-css">' + css + '</style>' + html.slice(i);
+      if (V) V.metti(PAG, r.crudi, {html: html, n: sb.n, ml: window.GXDC_ML || 0}, LOTTO);   // PRESTAZIONI P2
+      if (PREPARA) return;   // preparazione in anticipo (iframe nascosto del catalogo): niente da scrivere
       // la pagina a parte legge i suoi parametri (guscio=1, lang...) dall'indirizzo: si rimette il suo
       if (FIGLIA) { try { history.replaceState(null, '', APP + PG); } catch (e) {} }
       document.open();
@@ -151,6 +186,8 @@
     })
     .catch(function (e) {
       // (una pagina a parte precaricata e subito sostituita interrompe la richiesta: non e' un errore della pagina)
+      if (V) V.fatto(PAG);
+      if (PREPARA) { console.warn('[discord] preparazione in anticipo non riuscita', e); return; }
       (FIGLIA ? console.warn : console.error).call(console, '[discord] mini app non caricata', e);
       attesa('Il gioco non si apre: riprova tra poco.');
       if (!FIGLIA) { try { parent.postMessage({gx: 'errore'}, location.origin); } catch (x) {} }

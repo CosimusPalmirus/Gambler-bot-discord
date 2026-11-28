@@ -61,7 +61,9 @@
     });
     // avanza da solo ogni 6 s finché nessuno lo tocca (come l'Arena); mai se la pagina non si vede
     tCar = setInterval(function () {
-      if (carFermo || document.hidden || document.documentElement.classList.contains('modo-pip')) return;
+      // PRESTAZIONI P8: sotto l'iframe del gioco (html.in-gioco) il carosello non scorre (prima: scorrimento animato ogni 6 s
+      // dietro la partita, con il ricalcolo del layout del catalogo e i banner scaricati)
+      if (carFermo || document.hidden || document.documentElement.classList.contains('modo-pip') || document.documentElement.classList.contains('in-gioco')) return;
       var r = car.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return;
       var w = car.firstElementChild.offsetWidth + 12;
       var fine = car.scrollLeft + car.clientWidth >= car.scrollWidth - 4;
@@ -201,6 +203,8 @@
     $('t-canale').disabled = !on; $('t-coda').disabled = !on;
     $('t-canale').lastChild.textContent = on ? ' Gioca con il canale' : ' Gioca con il canale · presto';
     $('t-coda').lastChild.textContent = on ? ' Cerca avversari' : ' Cerca avversari · presto';
+    var sb = !!g.soloBot; $('t-canale').style.opacity = $('t-coda').style.opacity = sb ? '.45' : '';   // GEMBRAWL_2811: per ora solo coi bot
+    if (sb) { $('t-canale').disabled = $('t-coda').disabled = true; $('t-canale').lastChild.textContent = ' Gioca con il canale · presto'; $('t-coda').lastChild.textContent = ' Cerca avversari · presto'; $('f-nota').textContent = 'Per ora si gioca contro i bot, tutto qui nella pagina: la partita con il canale arriva presto.'; }
     var v = $('velo'); v.classList.add('su'); v.setAttribute('aria-hidden', 'false');
     disegnaPip();
     setTimeout(function () { $('t-canale').focus({preventScroll: true}); }, 60);
